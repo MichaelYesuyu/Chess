@@ -1,2 +1,2 @@
 # Chess
-Why do you need a description? Do you know what chess is?!?!?!
+Please teach me how to use github
