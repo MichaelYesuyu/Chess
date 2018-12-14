@@ -1,0 +1,57 @@
+
+package chess2;
+
+//THIS IS AN UPDATED VERSION 
+public class King extends Piece{
+    
+    /**
+     * This is the king object
+     * @param boards common board
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param id piece id
+     * @param color color of piece
+     */
+     public King(board boards, int x, int y, int id, char color){
+        setup(boards, x,y,id,color);//uses base constructor
+        setTag(id,"K",color);//tag is just for display mainly, but also used for now, once we have graphics we can transition out
+    }
+    
+     /**
+      * Checks all legal moves, processed in another method
+      */
+    public void checkLegalMove(){
+        queenMoves(true,tag.substring(0,1));//l here is considered, this is because a king is a rook and bishop combined that can only move one square on any directional vecor
+        //therefore if (lowercase L) -> l = 1(one), then the loop stops after one iteration via a built in break statement so only one move is considered 
+        if(getMoveCount()==0){
+            String tagRight = returnPiece(x+3,y);
+            String tagLeft = returnPiece(x-4,y);
+            String color = tag.substring(0,1);
+            
+            if(checkbounds(getX()+3,getY())&&!isInOpposite(color,getX()+1,getY())&&!isInCurrent(color,getX()+1, getY())&&!isInOpposite(color,getX()+2,getY())&&!isInCurrent(color,getX()+2,getY())){ 
+                    {
+                        System.out.println("considererrrrrrrd");
+                        System.out.println(tagRight);
+                            if(Integer.parseInt(tagRight.substring(4))==0){
+                                String castleMessage = "castle" + color+"L";
+                                System.out.println(castleMessage);
+                                addPossibleMoves(getX()+2,getY(),castleMessage);
+                                System.out.println("got here");
+                            // Chess2.boards[getX()+1][getY()] = "00000";
+                            }
+                        
+                    }
+
+                }
+                 
+                if(boards.getBoard()[getY()][getX()-1].equals("00000")&&boards.getBoard()[getY()][getX()-2].equals("00000")&&boards.getBoard()[getY()][getX()-3].equals("00000"))
+                        
+                        if(Integer.parseInt(tagLeft.substring(4))==0){
+                            String castleMessage = "castle" + color+"R";
+                            
+                            System.out.println(castleMessage);
+                            addPossibleMoves(getX()-2,getY(),castleMessage);
+                        }
+                }
+        }
+}
