@@ -1,0 +1,53 @@
+
+package chess2;
+/**
+ * This class is where the images are handled
+ */
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.net.URL;
+
+public class Images {
+    Image image;
+    /**
+     * Using an image filepath we create an image Object that other classes can render and use 
+     * @param filename the filename of the image that we are going to setup  
+     */
+    public Images(String filename){
+        setImage(filename);
+    }
+    /**
+     * 
+     * @param filename the filename of an image, for example whiterook.png
+     * @return if the filename is valid it returns it as a url that an image can use 
+     */
+    private URL getURL(String filename){
+        URL url = null;
+        try{
+        url =this.getClass().getResource(filename);
+        }catch(Exception e){
+            System.out.println("image does not exist");
+                    
+        }
+        return url;
+    }
+    /**
+     * Here we use the getURL to get the location of an image and then we initialize our image using it 
+     * @param filename we need filename to create a url that we can use to create the image  
+     */
+    public void setImage(String filename){
+        this.image = Toolkit.getDefaultToolkit().getImage(getURL(filename));
+    }
+    /**
+     * Getter method 
+     * @return Returns the image  
+     */
+    public Image getImage(){
+        return this.image;
+    }
+}
+
+
+
+
+
