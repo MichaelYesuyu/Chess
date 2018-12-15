@@ -1,4 +1,4 @@
 # Chess
-Chess program in the making
+Chess program in the making.
 Opening repretoire sourced from nikslaf/eco
 
