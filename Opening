@@ -14,7 +14,7 @@ import java.util.*;
 import java.io.*;
 
 //probably extends the player class
-public class Opening extends Player{
+public class Opening extends Engine{
     
        
     String whiteMove = "";
@@ -132,5 +132,4 @@ public class Opening extends Player{
 //    }
     
 }
-
 
