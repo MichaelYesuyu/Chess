@@ -42,19 +42,19 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMotionListener{
-    images whiteRook = new images("whiterook.png");//creates new Images, all of whitch are displayed in gameUpdate
-    images whiteKnight = new images("whiteknight.png");
-    images whiteBishop = new images("whitebishop.png");
-    images whiteQueen = new images("whitequeen.png");
-    images whiteKing = new images("whiteking.png");
-    images whitePawn = new images("whitepawn.png");
-    images blackRook = new images("blackrook.png");
-    images blackKnight = new images("blackknight.png");
-    images blackBishop= new images("blackbishop.png");
-    images blackQueen = new images("blackqueen.png");
-    images blackKing= new images("blackking.png");
-    images blackPawn = new images("blackpawn.png");
-    String[][] boards ={//an 8 by 8 array representing the board the board is meant to be transfered between the board class and this class so that the ai can keep track of the board, setup in board
+    Images whiteRook = new Images("whiterook.png");//creates new Images, all of whitch are displayed in gameUpdate
+    Images whiteKnight = new Images("whiteknight.png");
+    Images whiteBishop = new Images("whitebishop.png");
+    Images whiteQueen = new Images("whitequeen.png");
+    Images whiteKing = new Images("whiteking.png");
+    Images whitePawn = new Images("whitepawn.png");
+    Images blackRook = new Images("blackrook.png");
+    Images blackKnight = new Images("blackknight.png");
+    Images blackBishop= new Images("blackbishop.png");
+    Images blackQueen = new Images("blackqueen.png");
+    Images blackKing= new Images("blackking.png");
+    Images blackPawn = new Images("blackpawn.png");
+    String[][] boards ={//an 8 by 8 array representing the Board the Board is meant to be transfered between the Board class and this class so that the ai can keep track of the Board, setup in Board
             {"bR260","bH270","bB280","bQ290","bK300","bB310","bH320","bR330"},//each piece has a tag, the first char is the color, second is type, and third is id  
             {"bP340","bP350","bP360","bP370","bP380","bP390","bP400","bP410"},//tags are used to calculate the legal moves available, and differentiate between pieces of the same type
             {"00000", "00000","00000","00000", "00000","00000","00000", "00000"},//these all represent the blank squares 
@@ -66,7 +66,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     
             };
     boolean turn = true; //whites turn = true, blacks turn = false
-    board board = new board(boards);//creates a new board with this array, in order to allow for flipage in the future board can be created from any array, however board makes assumptions based on the array being chess focused 
+    Board board = new Board(boards);//creates a new Board with this array, in order to allow for flipage in the future Board can be created from any array, however Board makes assumptions based on the array being chess focused 
     Pawn[] pawnsWhite = new Pawn[8];//creates pieces, will be further setup in the constructor, in array form so the code is less redundant and 
     Pawn[] pawnsBlack = new Pawn[8];//we do not have to account for every single piece this way, rather they can be looped through an array 
     Rook[] rooksWhite = new Rook[2];
@@ -93,7 +93,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     ArrayList<Integer> blackMovesY= new ArrayList<>();
     ArrayList<Integer> whiteMovesY = new ArrayList<>();
     ArrayList<String> moveRecorder = new ArrayList<>();
-    ArrayList<Integer> blackOtherMovesX= new ArrayList<>();//these store the potential moves based on a hypothetical change to the board 
+    ArrayList<Integer> blackOtherMovesX= new ArrayList<>();//these store the potential moves based on a hypothetical change to the Board 
     ArrayList<Integer> whiteOtherMovesX = new ArrayList<>();
     ArrayList<Integer> blackOtherMovesY= new ArrayList<>();
     ArrayList<Integer> whiteOtherMovesY = new ArrayList<>();
@@ -145,28 +145,28 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                 e.printStackTrace();//if for somereason there is an error, print where it occured 
             }
             displayBoard++;
-            if(displayBoard>13){//delays the load in order to avoid buffering of the images as they load to the screen, it takes 12 loops for buffering to stop
+            if(displayBoard>13){//delays the load in order to avoid buffering of the Images as they load to the screen, it takes 12 loops for buffering to stop
                 setVisible(true);
             }
-            gameUpdate();//draws the board graphics
+            gameUpdate();//draws the Board graphics
         }
     }
     /**
      * This is where all the graphics are managed 
-     * No matter what draw the white button and a home button
-        *The methods for restarting haven't been done yet     
-     * If the game state is 0
-        *Draw the home screen 
-     *If the gamestate is 1
-        *Draw the directions page
-     *If a gamestate is 2 or 3 or 4 draw the regular board        
-        * This is the class where the graphical board is redrawn
-        * First the blank squares are drawn 
-        * Next, based on the value for every element in the board array an image is drawn to represent all the pieces 
-     * If the gamestate is 5
-        *Open the settings page  
+ No matter what draw the white button and a home button
+The methods for restarting haven't been done yet     
+ If the game state is 0
+Draw the home screen 
+If the gamestate is 1
+Draw the directions page
+If a gamestate is 2 or 3 or 4 draw the regular Board        
+ This is the class where the graphical Board is redrawn
+ First the blank squares are drawn 
+ Next, based on the value for every element in the Board array an image is drawn to represent all the pieces 
+ If the gamestate is 5
+Open the settings page  
      */
-    public void gameUpdate(){//where the board is drawn, draws squares that represent the board squares, and it takes the boards array, and based off the tags draws the appropriate piece
+    public void gameUpdate(){//where the Board is drawn, draws squares that represent the Board squares, and it takes the boards array, and based off the tags draws the appropriate piece
         //THIS IS DRAWN NO MATTER WHAT 
         g2d.setColor(Color.WHITE);//sets the color to white because that is the first color that we need 
         g2d.fillRect(0, 0,800,800);
@@ -175,7 +175,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
 
                 for(int j =7; j >= 0; j--){
 
-                    if(setFill){//set fill describes what color the board square should be drawn as, if it is true then draw a brown squaree
+                    if(setFill){//set fill describes what color the Board square should be drawn as, if it is true then draw a brown squaree
                         setFill = false;
                         g2d.setColor(new Color(200,160,120));//a brown color from online
                         Rectangle rect = new Rectangle(100+j*75, 100+i*75, 75, 75);//starting location is 100,100 every new square is drawn at increments of 75
@@ -188,8 +188,8 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                         g2d.fill(rect);
 
                     }
-                    //these images are all drawn after the drawing of the squares so that the squares don't overlapp the
-                    if(boards[i][j].substring(0,2).equals("wP")){//based on the tag, if the tag, every location on the board has a tag 
+                    //these Images are all drawn after the drawing of the squares so that the squares don't overlapp the
+                    if(boards[i][j].substring(0,2).equals("wP")){//based on the tag, if the tag, every location on the Board has a tag 
                             g2d.drawImage(whitePawn.getImage(),100+75*j,100+i*75,this);//draws the image that corresponds to the tag
 
                     }
@@ -239,12 +239,12 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                     }
 
                 }
-                if(setFill){setFill=false;}//switches the fill color for every y value change(change in i) so that the chess board is accuratley represented
+                if(setFill){setFill=false;}//switches the fill color for every y value change(change in i) so that the chess Board is accuratley represented
                     else{setFill=true;}
                 
 
             }
-            for(int i =0; i < 9; i++){//draws the lines around the board 
+            for(int i =0; i < 9; i++){//draws the lines around the Board 
                 g2d.setColor(Color.BLACK);
                 g2d.setStroke(new BasicStroke(5.0f));//sets the stroke width to five for more defined lines 
                 g2d.drawLine(100,100+i*75, 700, 100+i*75);
@@ -254,12 +254,12 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
             Font stringFont = new Font( "SansSerif", Font.PLAIN, 18 );//we got this method from stack exchange in a post about changing fonts 
             g2d.setFont(stringFont);
 
-            g2d.drawString("               " + checkmessage,200,780);
+            g2d.drawString("The checkmessage is: " + checkmessage,200,780);
         }
         if(gamestate ==3){//if the state is 3( The state for a passed white pawn) then draw a queen, rook,knight and bishop to the screen
-                boolean secfill = !setFill;//used to switch the color of the squares for these images without messing with the normal boards setFill 
+                boolean secfill = !setFill;//used to switch the color of the squares for these Images without messing with the normal boards setFill 
                 for(int j =0; j < 4; j++){
-                    if(!secfill){//sec fill describes what color the board square should be drawn as, if it is true then draw a brown squaree
+                    if(!secfill){//sec fill describes what color the Board square should be drawn as, if it is true then draw a brown squaree
                         secfill = true;
                         g2d.setColor(new Color(200,160,120));//a brown color from online
                         Rectangle rect = new Rectangle(100+(j+2)*75, 25, 75, 75);//starting location is 100,100 every new square is drawn at increments of 75
@@ -274,7 +274,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                     }
                     
                 }
-                g2d.drawImage(whiteQueen.getImage(),100+75*2,28,this);//starting above the second square start drawing the board 
+                g2d.drawImage(whiteQueen.getImage(),100+75*2,28,this);//starting above the second square start drawing the Board 
                 g2d.drawImage(whiteBishop.getImage(),100+75*3,28,this);
                 g2d.drawImage(whiteKnight.getImage(),100+75*4,28,this);
                 g2d.drawImage(whiteRook.getImage(),100+75*5,28,this);
@@ -283,7 +283,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
         if(gamestate ==4){//same as state 3 but for a black passed pawn 
                 boolean secfill = !setFill;
                 for(int j =0; j < 4; j++){
-                    if(!secfill){//set fill describes what color the board square should be drawn as, if it is true then draw a brown squaree
+                    if(!secfill){//set fill describes what color the Board square should be drawn as, if it is true then draw a brown squaree
                         secfill = true;
                         g2d.setColor(new Color(200,160,120));//a brown color from online
                         Rectangle rect = new Rectangle(100+(j+2)*75, 700, 75, 75);//starting location is 100,100 every new square is drawn at increments of 75
@@ -323,10 +323,10 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     public void mouseExited(MouseEvent e){}//added so that there is no exception
     public void mouseEntered(MouseEvent e){}//added so that there is no exception
     /**
-     * This is used to get user input and convert it to move coordinates that can be used to update the board accordingly 
-     * Stores the type of the piece to a global variable that other classes can access to see what piece was originally clicked
-     * Also accounts for input in other gamestates such as 3 and 4, the passed pawn game states
-     * in the passed pawn game state you cannot interact with the board 
+     * This is used to get user input and convert it to move coordinates that can be used to update the Board accordingly 
+ Stores the type of the piece to a global variable that other classes can access to see what piece was originally clicked
+ Also accounts for input in other gamestates such as 3 and 4, the passed pawn game states
+ in the passed pawn game state you cannot interact with the Board 
      * @param e used to get the mouse x and y and to account for a mouseEvent 
      */
     public void mousePressed(MouseEvent e){//Where the event handeling begins, here the program checks if a piece has been selected, and if it has store information about it 
@@ -354,8 +354,8 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
             if(mouseX>=250&&mouseX<=325&&mouseY>28&&mouseY<=103){//look to see if you clicked on a queen
                 
                 pawnsWhite[saveK].setTag(pawnsWhite[saveK].getID(),"Q",pawnsWhite[saveK].getTag().charAt(0));//change the pawn into a queen
-                 boards[pawnsWhite[saveK].getY()][pawnsWhite[saveK].getX()]=pawnsWhite[saveK].getTag();//update the board with the new tag
-                board.updateBoard(boards);//update teh common board to the displayed board 
+                 boards[pawnsWhite[saveK].getY()][pawnsWhite[saveK].getX()]=pawnsWhite[saveK].getTag();//update the Board with the new tag
+                board.updateBoard(boards);//update teh common Board to the displayed Board 
                 gamestate = 2;//allow for input again 
                 //processMove(pawnsWhite[saveK],pawnsWhite[saveK].getX(),pawnsWhite[saveK].getY());
             }
@@ -420,9 +420,9 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                 //processMove(pawnsWhite[saveK],pawnsWhite[saveK].getX(),pawnsWhite[saveK].getY());
             }
         }
-        for(int i =0; i < 8;i++){//the code below is used to check if the x and y values are in the board and store coordinates amd tag 
-            for(int j =0; j < 8; j++){//we loop through every square on the board 
-                if(mouseX>100+j*75&&mouseX<100+75+j*75&&mouseY>100+i*75&&mouseY<100+(i*75)+75&&gamestate ==2){//checks if the mouse was presed on the board  
+        for(int i =0; i < 8;i++){//the code below is used to check if the x and y values are in the Board and store coordinates amd tag 
+            for(int j =0; j < 8; j++){//we loop through every square on the Board 
+                if(mouseX>100+j*75&&mouseX<100+75+j*75&&mouseY>100+i*75&&mouseY<100+(i*75)+75&&gamestate ==2){//checks if the mouse was presed on the Board  
                     type = "";//resets type 
                     for(int k=0; k<8;k++){//used to check if it is one of the pawns 
                         if(Integer.parseInt(boards[i][j].substring(2,4))==pawnsWhite[k].getID()&&turn){//if the id matches a pawnID and it is whites turn
@@ -505,17 +505,17 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     }
     }
     /**
-     * Converts the mouseX and mouseY to the board index through a loop where the position is stored as i and j 
-     * Checks to see if a piece was selected before by using the global variable type 
-     * If a pice was selected before then see if the move was legal by using processMove and the board i and j
-     * If the piece was a pawn look to see if it was pushed to the end and if it was then call the processPush method, which switches the gamestate
+     * Converts the mouseX and mouseY to the Board index through a loop where the position is stored as i and j 
+ Checks to see if a piece was selected before by using the global variable type 
+ If a pice was selected before then see if the move was legal by using processMove and the Board i and j
+ If the piece was a pawn look to see if it was pushed to the end and if it was then call the processPush method, which switches the gamestate
      * @param e  used to get the x and the y of the mouse 
      */
     public void mouseReleased(MouseEvent e){//here checks if a piece has been selected ,and if so, based on the x and y of the mouse if the move made to it is leaal
         
         int mouseX = e.getX();//stores the x and y of the mouse 
         int mouseY = e.getY();
-        for(int i =0; i < 8;i++){//same loop as above, if the mouse was pressed on the board, get the coordinates of the board through x and y 
+        for(int i =0; i < 8;i++){//same loop as above, if the mouse was pressed on the Board, get the coordinates of the Board through x and y 
             for(int j =0; j < 8; j++){
                if(mouseX>100+j*75&&mouseX<100+75+j*75&&mouseY>100+i*75&&mouseY<100+(i*75)+75){
                     
@@ -613,6 +613,21 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
      * If the move has been legal we edit the board and handle any collisions that occur
      * If the move is illegal reset the board to the original version 
      */
+
+    /**
+     * Here any potential moves gathered from the mouseInputs are tested
+     * @param piece the piece that we want to move to a location
+     * @param x the x location that is being tested
+     * @param y same as x but with  y
+ First we make sure that checkmate or stalemate has not been declared via the handle boolean, which is originally true but turned off when 
+ either of these game ending states occur 
+ Secondly it checks if the move that was created based on where the mouse was pressed and released was legal, this however doesn't require mouse
+ input and an ai can use this class to 
+ After this, based on the type of move we determine what type of move was made and look for a check, or in castling's case looks for multiple 
+ squares to make sure that the opposite color doesn't have a legal move that intersects it including check
+ If the move has been legal we edit the Board and handle any collisions that occur
+ If the move is illegal reset the Board to the original version
+     */
     public void processMove(Piece piece, int x,int y){//mangages any move done to a piece
 
         
@@ -621,7 +636,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
         switch(piece.checkPossibleMoves(x,y)){
             case 1:
                 handleCollision(piece.getTag().substring(0,2),piece.getY(),piece.getX(),true);
-                board.setTotalMoveCount(1);//everything is done in board now for processing moves, will update all later, but this way we can transition into board becoming the main class
+                board.setTotalMoveCount(1);//everything is done in Board now for processing moves, will update all later, but this way we can transition into Board becoming the main class
                 board.getBoard()[piece.getY1()][piece.getX1()]="00000";
                 piece.setTag(Integer.parseInt(piece.getTag().substring(2,4)),piece.getTag().substring(1,2),piece.getTag().charAt(0));
                 System.out.println(piece.getTag());
@@ -634,13 +649,13 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                 //piece.deleteMoves();
                 if(!isInCheck(piece.getTag().charAt(0),true)){//if it is not in check 
                     
-                    setBoard(board.getBoard());//then update the display board accordingly 
+                    setBoard(board.getBoard());//then update the display Board accordingly 
 
                 }else{
                     //board.displayBoard();
                     
                     System.out.println("there was a check detected");
-                    board.updateBoard(boards);//sets the board back to the original board
+                    board.updateBoard(boards);//sets the Board back to the original Board
                     piece.moveChanges(piece.getX1(),piece.getY1());//moves the piece to its original location and sets the new location back to blank if it doesn't prevent a check
                     break;//ends before the turn is switched so the person has a chace to get it right
                     
@@ -687,7 +702,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                 break;
             case 5:
                 if(!isInOpposite('b',4,0)&&!isInOpposite('b',5,0)&&!isInOpposite('b',6,0)&&!isInOpposite('b',7,0)){
-                    
+                    System.out.println("ladies and gentlemen we gottem");
                     castleProcess(rooksBlack[1],kingBlack,1);
                     kingWhite.moveChanges(6,0);
                     boards[0][6] = kingBlack.getTag();
@@ -705,7 +720,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                 break;
             case 6: 
                 if(!isInOpposite('w',0,7)&&!isInOpposite('w',1,7)&&!isInOpposite('w',2,7)&&!isInOpposite('w',3,7)&&!isInOpposite('w',4,7)){
-                    
+                    System.out.println("ladies and gentlemen we gottem");
                     castleProcess(rooksWhite[0],kingWhite,-1);
                     kingWhite.moveChanges(2,7);
                     boards[7][2] = kingWhite.getTag();
@@ -723,7 +738,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                 break;
             case 7: 
                 if(!isInOpposite('b',0,0)&&!isInOpposite('b',1,0)&&!isInOpposite('b',2,0)&&!isInOpposite('b',3,0)&&!isInOpposite('b',4,0)){
-                    
+                    System.out.println("ladies and gentlemen we gottem");
                     castleProcess(rooksBlack[0],kingBlack,-1);
                     kingWhite.moveChanges(2,0);
                     boards[0][2] = kingBlack.getTag();
@@ -751,12 +766,12 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
         if(whitecount ==0||blackcount==0){
             if(isInCheck('b',true)){ 
                 System.out.println("checkmate handled ");
-                checkmessage = "checkmate, white won";
+                checkmessage = "checkmate, white won!!! ggs  ";
                 handle = false;
                 
             }else if(isInCheck('w',true)){
                 System.out.println("checkmate handled ");
-                checkmessage = "checkmate, black won";
+                checkmessage = "checkmate, black won!!!! ggs ";
                 handle = false;
             }
             else{
@@ -764,15 +779,17 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                 checkmessage= "stalemate";
                 handle = false;
             }
-        }
+        }else if(isInCheck('w',true)){checkmessage = "is in checkwhite";}
+        else if(isInCheck('b',true)){checkmessage = "is in checkblack";}
+        else{checkmessage = "is not in check";}
             
     }
     /**
      * This is for castling and checks if black has a legal move in any of the squares that king and rook will cross through/inhibit
-     * Can also be used to see if a specific square on the board is in the legal moves of the opposite side 
+ Can also be used to see if a specific square on the Board is in the legal moves of the opposite side 
      * @param color the color of the square that you are testing, used to compare with the color of a square is a legal mvoe for the opposite color 
-     * @param x the x coordinate of the board piece that your are testing
-     * @param y the y coordinate of teh board piece that you are testing 
+     * @param x the x coordinate of the Board piece that your are testing
+     * @param y the y coordinate of teh Board piece that you are testing 
      * @return if the square is in the possible moves of the opponent then return true 
      */
     public boolean isInOpposite(char color, int x, int y ){
@@ -822,7 +839,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                 if(kingwhitex==blackOtherMovesX.get(i)&&kingwhitey==blackOtherMovesY.get(i)){
                     //tests if the kings location is in the potential locatiosn for the 
                     if(kingupdate){
-                        checkmessage = "";
+                        checkmessage = "is in check white";
                     }
                     if(color=='w'){
                         
@@ -836,7 +853,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                 if(kingblackx==whiteOtherMovesX.get(i)&&kingblacky==whiteOtherMovesY.get(i)){
                     //same logic for black
                     if(kingupdate){
-                        checkmessage = "";
+                        checkmessage = "is in check black";
                     }
                     if(color=='b'){
                        
@@ -847,7 +864,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
             }
         }
         if(kingupdate){
-            checkmessage = "";
+            checkmessage = "not in check";
         }
         return false;
     }/**
@@ -923,9 +940,9 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     }
     /**
      * 
-     * @param board this is used to update the display board(the array called boards) with another array
-     * Mainly used to update boards to the most updated array in board, which is how all the pieces are edited so that there is no confusion between 
-     * graphics and between the 
+     * @param board this is used to update the display Board(the array called boards) with another array
+ Mainly used to update boards to the most updated array in Board, which is how all the pieces are edited so that there is no confusion between 
+ graphics and between the 
      */
     public void setBoard(String[][] board){
        for(int i =0;i<8;i++){
@@ -1075,7 +1092,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                                 pawnsWhite[k].controlledOff = false;
                         }
                         
-                    }//the above logic repeats for every piece on the board 
+                    }//the above logic repeats for every piece on the Board 
                     for(int k =0; k < 2;k++){//same as above but for other pieces 
                         if(!tag.equals("wR")&&Integer.parseInt(board.getBoard()[i][j].substring(2,4))==rooksWhite[k].getID()){
                             if(type)
@@ -1122,7 +1139,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                             else
                                pawnsBlack[k].controlledOff = false;
                         }
-                }//the above logic repeats for every piece on the board 
+                }//the above logic repeats for every piece on the Board 
                 for(int k =0; k < 2;k++){//same as above but for other pieces 
                     
                     if(!tag.equals("bR")&&Integer.parseInt(boards[i][j].substring(2,4))==rooksBlack[k].getID()){
@@ -1199,7 +1216,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                             pawnsBlack[k].checkLegalMove();//gets all of the legal moves for a black pawn 
                             setBlackLocation(pawnsBlack[k],'b');// adds it to the blackMovesX and blackMovesY array list
                             
-                    }//the above logic repeats for every piece on the board 
+                    }//the above logic repeats for every piece on the Board 
                 for(int k =0; k < 2;k++){//same as above but for other pieces 
                    
                         rooksBlack[k].deleteMoves();
@@ -1303,9 +1320,6 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     }
     
 }
-
-
-
 
 
 
