@@ -1,15 +1,22 @@
-
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 //THIS IS AN UPDATED VERSION 
 package chess2;
 
 import java.util.ArrayList;
 
-
+/**
+ *
+ * @author vshah-21
+ */
 public class Piece {//all other pieces are extensions of this class, contains all piece methods except for check legal move and special moves 
     int id, x, y,x1,y1 , value, movecount =0;//special is for castlening an en passant, id stores the id of the piece, x and y the current coordinates
     //x1 and y1 store the previous coordinates so that movement isn't so hard to do, value could be used later, and movecount is for castleing and pawns
     boolean alive = true;//not needed was just a test but we can change later
-    board boards;//gets the current board
+    Board boards;//gets the current Board
     String tag = "";
     ArrayList<Integer> possiblemovesX = new ArrayList<>();//stores all the potential x coordinates of a move 
     ArrayList<Integer> possiblemovesY = new ArrayList<>();//stores all the potential y coordinates of a move
@@ -20,25 +27,28 @@ public class Piece {//all other pieces are extensions of this class, contains al
     public Piece(){//blank consturctor
         
     }
-    
     /**
-     * a common constructor for piece, just can't be in actual constructor 4 inheritance purposes
-     * @param boards 
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param id piece id
-     * @param color color - black or white
+     * The purpose of setup is to be a general constructor that other classes can use without running into inheritance issues 
+ It also sets up the tag allowing for the Board to draw it 
+     * @param boards allows the piece to use the common Board, the Board array from the Board class 
+     * @param x the x location of the piece 
+     * @param y the y location of the piece 
+     * @param id the id of the piece, used to figure out what the specific piece is 
+     * @param color used to setup the color in the tag 
      */
-    public void setup(board boards, int x, int y, int id, char color){
-        this.boards = boards;//makes sure that the board is the common board
-        this.x = x;//setting up variables
+    public void setup(Board boards, int x, int y, int id, char color){
+        this.boards = boards;
+        this.x = x;
         this.y = y;
         this.id = id;
-        setTag(id,"P",color);//tag is just for display mainly, but also used for now, once we have graphics we can transition out
+        setTag(id,"P",color);
         
-    }//every single getter and setter method is below here 
-    
-    
+    }
+    /**
+     * 
+     * @return returns the last move using the moverecorder from the Board class which stores all the moves, we can now transition out of private 
+ moveRecorders and into public ones 
+     */
     public String getLastMoveTag(){
         if(boards.getTotalMoveCount()!=0){
             System.out.println("Last Move Tag:"+boards.moveRecorder.get(boards.getTotalMoveCount()-1).substring(0,4));
@@ -46,120 +56,239 @@ public class Piece {//all other pieces are extensions of this class, contains al
             
         }return "";
     }
-    public ArrayList<Integer> getMovesX(){//returns all the x possible moves 
+    /**
+     * Used to get all the possibleX moves for a piece so that a class such as chess2, or the ai can use it  
+     * @return possiblemovesX arraylist 
+     */
+    public ArrayList<Integer> getMovesX(){
         return possiblemovesX;
     }
+    /**
+     * Used to get all the possibleY moves for a piece so that a class such as chess2, or the ai can use it 
+     * @return possiblemovesY arrayList 
+     */
     public ArrayList<Integer> getMovesY(){//returns all the y possible moves 
         return possiblemovesY;
     }
-    public void setX1(int x1){//getter and setter methods, not much else
+    /**
+     * Sets the x1-location which is used for testing possible moves(so that you can undo the move that you made) and used for undoing a move if it is not legal
+     * @param x1 integer that is used to change y1
+     */
+    public void setX1(int x1){
         this.x1 = x1;
     }
-    public int getX1(){//returns the previous x location of the piece
+    /**
+     * returns the x1 location 
+     * @return x1
+     */
+    public int getX1(){
         return this.x1;
     }
-    public void setY1(int y1){//returns the previous y location of the piece
+    /**
+     * Sets the y1-location, same as setX1
+     * @param y1 integer that is used to change Y1
+     */
+    public void setY1(int y1){
         this.y1 = y1;
     }
+    /**
+     * returns the Y1 location, or the previous location 
+     * @return y1
+     */
     public int getY1(){
         return this.y1;
     }
+    /**
+     * Tag is one of the most important variables because it is how the Board represents a piece and allows for easy gathering of information on a piece 
+We can determine the id, type,color and movecount of a piece using the tag and this allows us to refrain from using a loop to process information about 
+ a piece and having to use specific getter and setter methods 
+ Used to edit the tag, can be used upon init but it is also used to implement movecount into the tag so it is constantly updated
+     * @param id the id of the piece will be contained in index's 2(third) and 3(fourth) of the string 
+     * @param type the type of piece is contained in the 1(second) index
+     * @param color the color of the piece is contained in the 0(first) index
+     * movecount trails the string, but it is always capped at 2 since there is no further information needed from it and it can mess up the length of
+     * the string adding extra index etc. 
+     */
     public void setTag(int id, String type, char color){//sets up the tag
         this.tag = ""+color + type + Integer.toString(id) + movecount;
     }
+    /**
+     * used to return the tag, this method is very important and is used alot 
+     * @return tag string  
+     */
     public String getTag(){//used to return the tag
         return this.tag;
     }
+    /**
+     * A general getter and setter method for tag 
+     * @param tag 
+     */
+    public void setsTag(String tag){
+        this.tag = tag;
+    }
+    /**
+     * Used to return the movecount of a piece, useful for castling and enpassant 
+     * @return the pieces movecount 
+     */
     public int getMoveCount(){//stores the amount of moves a piece has made, used for castling and pushing a pawn 2 squares 
         return this.movecount;
     }
+    /**
+     * Increments the movecount
+     * We might need to change this so that we can also lower the movecount 
+     */
     public void setMoveCount(){//used to increment move count everytime a move is executed
         if(movecount>=2){
             movecount=2;//makes sure it doesnt go above 2, but since one is still testable we need to test one 
         }
         movecount++;
     }
-    public int getX(){//returns the curretn x and y
+    /**
+     * Gets the x location of a piece 
+     * @return x coordinate 
+     */
+    public int getX(){
         return this.x;
     }
+    /**
+     * Gets the y location of a piece 
+     * @return y coordinate 
+     */
     public int getY(){
        return this.y;
     }
+    /**
+     * Used to edit the x location of a piece, say for example after a move has been performed 
+     * @param x new x coordinate 
+     */
     public void setX(int x){
         this.x = x;
     }
-    
+    /**
+     * Same as setX, edits the y location of a piece  
+     * @param y the new y coordinate  
+     */
     public void setY(int y){
         this.y = y;
     }
+    /**
+     * used to edit whether or not a pice is alive 
+     * @param x alive state: false = dead; true = alive 
+     */
     public void setAlive(boolean x){ // true is white, get rid of this maybe
         this.alive = x;
     }
+    /**
+     * Returns whether a piece is dead or alive, used so that if a piece is dead it cannot move anymore 
+     * @return alive state 
+     */
     public boolean returnAlive(){
         return alive;
     }
+    /**
+     * Only used at init, the ID NEVEER CHANGES, and is used to identify what piece is what since pawns, rooks, knights, and bishops are stored in 
+     * an array 
+     * @param ID the id  
+     */
     public void setID(int ID){//getter and setter methods for the id 
         this.id = ID;
-    }
+    }/**
+     * Returns the id, used often to see if a board location(Remember each board element/location stores a tag) is the same as an id, in mousepressed()
+     * mouseReleased() and handleCollisions() etc. in chess2 
+     * @return the ID 
+     */
+
+    /**
+     * Returns the id, used often to see if a Board location(Remember each Board element/location stores a tag) is the same as an id, in mousepressed()
+ mouseReleased() and handleCollisions() etc.in chess2
+     * @return the ID
+     */
     public int getID(){
         return id;
     }
+    /**
+     * To be used later for the engine to determine if a move is good or bad 
+     * @param value how much the piece is worth
+     */
     public void setValue(int value){//used by the ai to determine if a move is good or bad 
         this.value = value;
     }
+    /**
+     * Allows the engine to get the value of a piece 
+     * @return value 
+     */
     public int getValue(){
         return this.value;
     }
-    
     /**
-     * adds the possible moves to an array list, possible moves checked based on piece, each has own way of adding possible moves
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param special Used for special rules like enpassant
+     * Here, if a piece is alive then its moves are added to its possible moves 
+     * Each move along with the type of move is stored in an array list 
+     * When a move is made we make sure that the move is in these array lists in checkPossilbeMoves to determine whether or not is a legal move 
+     * We can also use this to consider all the possible moves that you can make 
+     * @param x x coordinate of the possible move 
+     * @param y y coordinate of the possible move 
+     * @param special used to determine what type of move it is i.e. whether or not it is a normal move, enpassant, or castling etc
      */
-    public void addPossibleMoves(int x, int y,String special){
+    public void addPossibleMoves(int x, int y,String special){//adds the possible moves to an array list, possible moves checked based on piece, each has own way of adding possible moves
         if(returnAlive()&&controlledOff){
             possiblemovesX.add(x);
             possiblemovesY.add(y);
             this.special.add(special);
         }
     }
-    
     /**
-     * checks if a piece or a move is on the board so no out of bounds errors occur 
-     * @param x x coordinate
-     * @param y y coordinate
-     * @return returns true if the coordinates are inside the board, false otherwise
+     * makes sure that a potential move is in bounds 
+     * If the move is in bounds we can add it to the arrays 
+     * @param x the x location of a potential move 
+     * @param y the y location of a potential move 
+     * @return if the move is in bounds: return true, if not: return false 
      */
-    public boolean checkbounds(int x, int y){
+    public boolean checkbounds(int x, int y){//checks if a piece or a move is on the Board so no out of bounds errors occur 
         if(x>-1&&x<8&&y>-1&&y<8){
             return true;
         }return false;
     }
+    /**
+     * Returns the arrayList<> containg the move types 
+     * @return special arrayList 
+     */
     public ArrayList<String> getSpecial(){
         return special;
     }
+    /**
+     * Used to get the moveRecorderArrayList so that it can be used in enpassant or in the future for undo move 
+     * @return moveRecoder array list
+     */
     public ArrayList<String> getMoveRecorder(){
         return moveRecorder;
     }
-    
+    /**
+     * Not really needed anymore phase out 
+     * @param moveRecorder used to update the move recorder to the latest version 
+     */
     public void setMoveRecorder(ArrayList<String> moveRecorder){
         this.moveRecorder = moveRecorder;
     }
-        
+    /**
+     * used to increment the totalMovecount 
+     * @param totalMoveCount used to determine by how much it is incremented 
+     */    
     public void setTotalMoveCount(int totalMoveCount){
         this.totalMoveCount++;
     }
-    
+    /**
+     * 
+     * @return the total movecount  
+     */
     public int getTotalMoveCount(){
         return totalMoveCount;
     }
-    
     /**
-     * Handles move changes
-     * @param x x coordinate
-     * @param y y coordinate
+     * Used to edit the x and y of a piece along with it's x1 and y1
+     * @param x the new x coordinate 
+     * @param y the new y coordinate 
      */
+    
     public void moveChanges(int x, int y){
         setX1(getX());//sets the x1 to the current x
         setY1(getY());//sets the y1 to the current y
@@ -168,23 +297,24 @@ public class Piece {//all other pieces are extensions of this class, contains al
         setMoveCount();//increments move count, for castling and pushing the pawn
         //clears the movelist so that no overlap of moves occurs
     }
-    
     /**
-     * The main movement method checks if the move made is in possible moves and edits piece based on it 
-     * @param x x coordinate
-     * @param y y coordinate
-     * @return Returns an integer based on situation to be handled inside process move in the main method
+     * Where the movement is handled and where we check for legal moves 
+     * First make sure the proposed new x and y coordinates are legal move coordinates that we can move to
+     * If they are legal, check what special we have and return different output based on it 
+     * Different returns means a different type of move, 1 is a normal move, 2, is enpassant, 3 is an illegal move(mainly since it was added before castling) 
+     *  and 4-7 are castling handles 
+     * @param x the proposed x 
+     * @param y the proposed y 
+     * @return the type of move
      */
-    public int checkPossibleMoves(int x, int y){//
+    public int checkPossibleMoves(int x, int y){//The main movmenent method checks if the move made is in possible moves and edits piece based on it 
         
         for(int i =0; i < possiblemovesX.size();i++){//loops through all pairs of possible moves 
             if(special.get(i).equals("normal")){
-                if(possiblemovesX.get(i)==x&&possiblemovesY.get(i)==y&&checkbounds(x,y)){//if the move made is possible 
-                    
-                        
-                    
+                if(possiblemovesX.get(i)==x&&possiblemovesY.get(i)==y&&checkbounds(x,y)){//if the move made is possible       
                     moveChanges(x,y);
                     totalMoveCount++;
+                    //System.out.println(totalMoveCount + "aaaaaaaaaaaaaaaaaaaaaaa");  
                     boards.moveRecorderAdd(getTag()+getY1()+getX1()+getY()+getX());//adds the moves to the list of recorded moves 
                     setMoveRecorder(boards.moveRecorder);
                     deleteMoves();
@@ -193,18 +323,15 @@ public class Piece {//all other pieces are extensions of this class, contains al
             }else if(special.get(i).equals("enpassant")&&possiblemovesX.get(i)==x&&possiblemovesY.get(i)==y&&checkbounds(x,y)){
                     if(getTag().charAt(0)=='w'){
                         moveChanges(x,y);
-                        boards.getBoard()[getY()][getX()]=getTag();
-                        boards.getBoard()[getY1()][getX1()]="00000";
-                        boards.getBoard()[getY()+1][getX()]="00000";
+                        //System.out.println("testing");
+                        
                         boards.moveRecorderAdd(getTag()+getY1()+getX1()+getY()+getX());
                         setMoveRecorder(boards.moveRecorder);
                         deleteMoves();
                         return 2;
                     }else{
                         moveChanges(x,y);
-                        boards.getBoard()[getY()][getX()]=getTag();
-                        boards.getBoard()[getY1()][getX1()]="00000";
-                        boards.getBoard()[getY()-1][getX()]="00000";
+                       
                         boards.moveRecorderAdd(getTag()+getY1()+getX1()+getY()+getX());
                         setMoveRecorder(boards.moveRecorder);
                         deleteMoves();
@@ -212,8 +339,8 @@ public class Piece {//all other pieces are extensions of this class, contains al
                     }
             }else if(special.get(i).equals("castlewL")&&possiblemovesX.get(i)==x&&possiblemovesY.get(i)==y&&checkbounds(x,y)){
                 moveChanges(x,y);
-                boards.getBoard()[getY()][getX()]=getTag();
-                boards.getBoard()[getY1()][getX1()]="00000";
+                //System.out.println("got here");
+                
                 boards.moveRecorderAdd(getTag()+getY1()+getX1()+getY()+getX());
                 setMoveRecorder(boards.moveRecorder);
                 deleteMoves();
@@ -222,9 +349,8 @@ public class Piece {//all other pieces are extensions of this class, contains al
             }
             else if(special.get(i).equals("castlebL")&&possiblemovesX.get(i)==x&&possiblemovesY.get(i)==y&&checkbounds(x,y)){
                 moveChanges(x,y);
+                //System.out.println("got heressssssssssssssssssss");
                 
-                boards.getBoard()[getY()][getX()]=getTag();
-                boards.getBoard()[getY1()][getX1()]="00000";
                 boards.moveRecorderAdd(getTag()+getY1()+getX1()+getY()+getX());
                 setMoveRecorder(boards.moveRecorder);
                 moveRecorder.add(getTag()+getY1()+getX1()+getY()+getX());
@@ -233,9 +359,8 @@ public class Piece {//all other pieces are extensions of this class, contains al
             }
             else if(special.get(i).equals("castlewR")&&possiblemovesX.get(i)==x&&possiblemovesY.get(i)==y&&checkbounds(x,y)){
                 moveChanges(x,y);
+                //System.out.println("got heroLOLOLOLOLe");
                 
-                boards.getBoard()[getY()][getX()]=getTag();
-                boards.getBoard()[getY1()][getX1()]="00000";
                 boards.moveRecorderAdd(getTag()+getY1()+getX1()+getY()+getX());
                 setMoveRecorder(boards.moveRecorder);
                 deleteMoves();
@@ -243,9 +368,8 @@ public class Piece {//all other pieces are extensions of this class, contains al
             }
             else if(special.get(i).equals("castlebR")&&possiblemovesX.get(i)==x&&possiblemovesY.get(i)==y&&checkbounds(x,y)){
                 moveChanges(x,y);
+                //System.out.println("got heressssssssssssssssssss");
                 
-                boards.getBoard()[getY()][getX()]=getTag();
-                boards.getBoard()[getY1()][getX1()]="00000";
                 boards.moveRecorderAdd(getTag()+getY1()+getX1()+getY()+getX());
                 setMoveRecorder(boards.moveRecorder);
                 deleteMoves();
@@ -255,46 +379,40 @@ public class Piece {//all other pieces are extensions of this class, contains al
         
     }
     
-    /**
-     * testing purposes
-     */
-    public void displayAllMoves(ArrayList<Integer> x, ArrayList<Integer> y){//once again for testing purposes
-        for(int i =0; i < possiblemovesX.size();i++){
-            x.add(possiblemovesX.get(i));
-            y.add(possiblemovesY.get(i));
-        }
-    }
-    
-    /**
-     * testing purposes
-     */
+   /**
+    * Used for testing
+    * To display all the moves that  a piece can make
+    */
     public void displayMoves(){
         for(int i =0; i < possiblemovesX.size();i++){
             System.out.println("tag: " + getTag() + "possible x and y : " + possiblemovesX.get(i) + " " + possiblemovesY.get(i));
         }
     }
-    
     /**
-     * refreshes moves list so that no illegal moves are made such as moving backwards because that was once a legal move 
+     * resets the movelist so that no previous legal moves are considered and to remove redundancy 
      */
     public void deleteMoves(){
-        for(int i = possiblemovesX.size();i >0;i--){//since possibleMovesX and possibleMovesY are the same size can use either or, starts at the back 
+        for(int i = possiblemovesX.size();i >0;i--){//sicne possibleMovesX and possibleMovesY are the same size can use either or, starts at the back 
             possiblemovesX.remove(i-1);//it is i-1 because length is one greater than the hightest index 
             possiblemovesY.remove(i-1);
             special.remove(i-1);
         }
     }
-    
-    //below here all the moves for a given piece are put in methods, saves code on pawn, king and queen 
-    
     /**
-     * 
-     * @param breakOn
-     * @param color color of the piece
-     */
+     * Generates the legal moves for a bishop 
+     * Four booleans are created, each of which represents one of the four diagonals that a bishop can move on
+     * If a move along a diagonal is illegal(out of bounds, taking another piece, or piece hopping), the boolean is set to false and we no longer consdider 
+     * those moves 
+     * It uses bishops general to determine when to turn the booleans off and on
+     * We loop through each square on the diagonal adding moves to the possibleMoves until we get to a point where a move is illegal in which case we 
+     * turn off the boolean that represents that diagonal and moves are no longer considered from there 
+     * Since a king moves like a bishop but can only consider one move along each diagonal a boolean called breakOn is created which says that if it is 
+     * a king then stop considering moves after one iteration since a king cannot consider past one move on each diagonal 
+     * @param breakOn whether or not it is a king 
+     * @param color the color of a piece, used in bishops general for isInCurrent and isInOpposite 
+     */ 
     public void bishopMoves(boolean breakOn,String color){
-        //this.boards.getBlackCount();//used for ai later maybe 
-        //this.boards.getWhiteCount();
+        
         boolean one = true;//creates that the bishopGeneralClass uses to determine when to stop adding moves to an array
         boolean two = true;//for example(long example) say there is a piece in the way of a white bishop, the bishop cannont only not consider that move it cannot consider any move after that 
         boolean three = true;//*continuing from above: so this boolean is used to determine whether or not we can keep looking at the moves or there was a piece in the way which means we cannot consider them
@@ -320,17 +438,21 @@ public class Piece {//all other pieces are extensions of this class, contains al
     
     }
     }
-    
     /**
-     * this class works for rooks to but is called bishops general because it was created for bishops
-     * @param i coordinate
-     * @param j coordinate
-     * @param color color of piece
-     * @param on isInCurrent
-     * @return returns if the move is possible
+     * BishopsGeneral is used by both rooks and bishops but we realized that we could use it for rooks too so it is now used for both rooks and bishops
+     * It works by checking  a x and y coordinates (a move) and saying if the move is a capture, and if so then add the move to legal moves
+     * but turn the boolean on to false so that we can break 
+     * out of the loop in rookMoves and bishopMoves
+     * If the move is not a capture but rather is a move that would lead to it taking a piece of the same color do not even consider the move jut turn the 
+     * boolean to false so that we don't consider any more moves 
+     * If the boolean on is true after checking those two cases then add the move to the possible moves array 
+     * @param i the y coordinate 
+     * @param j the x coordinate 
+     * @param color the color of the piece used for isInOpposite and isInCurrent(the color of the piece) 
+     * @param on used to determine whether or not we should return false or true
+     * @return 
      */
-    public boolean bishopGeneral(int i,int j, String color,boolean on){//
-        //how it works: it, a boolean on is created that is based on the booleans in rook and in bishop
+    public boolean bishopGeneral(int i,int j, String color,boolean on){
         if(isInOpposite(color,i, j)&&on!=false){//makes sure that the potential move is not in the opposite color 
                addPossibleMoves(i,j,"normal");//since it is of the opposite color a capture is a possible move 
                on= false;//if this is false it will return true, reutrn true works as well 
@@ -346,13 +468,14 @@ public class Piece {//all other pieces are extensions of this class, contains al
             }
             
     }
-    
     /**
-     * uses bishops general in the same way but the loop checks for rook moves 
-     * @param breakOn boolean for if the move is possible
-     * @param color color of piece
+     * Rook moves is also based of similar logic to bishopMoves() since it is also considering four diagonals and breaking at the same points, i.e. 
+     * if we are in the opposite color stop checking for legal moves but add the move, if we are in the same color, stop checking, otherwise keepchecking 
+ until we run off the Board 
+     * @param breakOn used to determine whether or not we have a king 
+     * @param color  used to determine what color the piece is 
      */
-    public void rookMoves(boolean breakOn, String color){
+    public void rookMoves(boolean breakOn, String color){//uses bishops general in the same way but the loop checks for rook moves 
         //this.boards.getBlackCount();
         //this.boards.getWhiteCount();
         boolean one= true;
@@ -378,77 +501,80 @@ public class Piece {//all other pieces are extensions of this class, contains al
         
         }
     }
-    
     /**
-     * a queen has both the moves of a rook and a bishop available so it considers them both 
-     * @param breakOn Same as rookMoves and bishopMoves
-     * @param color color of piece
+     * Since a queen can perform both rook and bishop moves we can run both of them as a queen without needing to worry about creating a new 
+     * movement class for it 
+     * This class can also be used for a king since a king is a queen that has restricted movement which is what breakOn controls 
+     * @param breakOn tells us if it is a King or a queen 
+     * @param color used to get the color of the piece 
      */
-    public void queenMoves(boolean breakOn, String color){
-        rookMoves(breakOn,color);
+    public void queenMoves(boolean breakOn, String color){//a queen has both the moves of a rook and a bishop available so it considers them both 
+        rookMoves(breakOn,color);//l is also used here but since it is not a king it is ignored 
         bishopMoves(breakOn,color);
     }
-    
-    
+    public void kingMoves(String color){
+        queenMoves(true,color);
+    }
     /**
-     * where pawn movement is controlled, can be update to work with new black and white interface 
+     * A variable called z controls pawn moves, if the pawn is white then the y should be decreasing so z is 1, if the pawn is black then the 
+     * y value should be increasing so the value should be -1, this is because the function does (getY()-z) so the logical opperator is flipped 
+     * To see if taking a piece is possible we check if the piece to the left and up z is the opposite color or the piece to the right and up z 
+     * is the opposite color and based of that we allow for the taking of pieces 
+     * To check if we can move forward we see if the square infront of it is clear 
+     * If the square infront of the pawn is clear, we can then also check if the square two infront of it is clear, that meaning there are now black
+     * or white pieces in it , and the move count is zero we can also consider that as a legal move(this is pushing the pawn 2 squares forward 
+     * The pawn's enpassant is handled in pawn itself 
      */
-    public void pawnMoves(){
-        this.boards.getBlackCount();
-        this.boards.getWhiteCount();
+    public void pawnMoves(){//where pawn movement is controlled, can be update to work with new black and white interface 
+        //this.boards.getBlackCount();
+        //this.boards.getWhiteCount();
         int z = 0;
         if(tag.charAt(0)=='w'){
-            z = 1;//if it is white then it should be subtracting one frome every y value 
-            if(checkbounds(getX()+1,getY()-z)&&!boards.isInWhite(getX()+1,getY()-z)&&boards.isInBlack(getX()+1, getY()-z)){//this part needs to be changed for black, checks if there is a black piece
-                addPossibleMoves(getX()+1,getY()-z,"normal");
-            }
-            if(checkbounds(getX()-1,getY()-z)&&!boards.isInWhite(getX()-1,getY()-z)&&boards.isInBlack(getX()-1, getY()-z)){
-                addPossibleMoves(getX()-1,getY()-z,"normal");
-            }
+            z = 1;//if it is white then it should be subtracting one frome every y valu
             
         }else{
-            z = -1;// if it is black then it should be subtracting one from every x value
-            if(checkbounds(getX()+1,getY()-z)&&!boards.isInBlack(getX()+1,getY()-z)&&boards.isInWhite(getX()+1, getY()-z)){//this part needs to be changed for black, checks if there is a black piece
-                addPossibleMoves(getX()+1,getY()-z,"normal");
-                
-            }
-            if(checkbounds(getX()-1,getY()-z)&&!boards.isInBlack(getX()-1,getY()-z)&&boards.isInWhite(getX()-1, getY()-z)){
-                addPossibleMoves(getX()-1,getY()-z,"normal");
-            }
+            z = -1;// if it is black then it should be subtracting one from every x valu
         
+        }
+        if(checkbounds(getX()+1,getY()-z)&&!isInCurrent(getTag().substring(0,1),getX()+1,getY()-z)&&isInOpposite(getTag().substring(0,1),getX()+1, getY()-z)){//this part needs to be changed for black, checks if there is a black piece
+                addPossibleMoves(getX()+1,getY()-z,"normal");
+            }
+        if(checkbounds(getX()-1,getY()-z)&&!isInCurrent(getTag().substring(0,1),getX()-1,getY()-z)&&isInOpposite(getTag().substring(0,1),getX()-1, getY()-z)){
+            addPossibleMoves(getX()-1,getY()-z,"normal");
         }
         if(checkbounds(getX(),getY()-z)&&!boards.isInWhite(getX(),getY()-z)&&!boards.isInBlack(getX(), getY()-z)){//if no black or white pawns in the way then pushing forward one is legal
             
-            addPossibleMoves(getX(),getY()-z,"normal");
-            if(movecount==0&&!boards.isInWhite(getX(),getY()-z)&&!boards.isInBlack(getX(), getY()-(2*z))){//if no moves have been made then pushing by 2 is legal
+            addPossibleMoves(getX(),getY()-z,"normal");  
+            
+        }
+        if(movecount==0&&!isInCurrent(getTag().substring(0,1),getX(),getY()-2*z)&&!isInOpposite(getTag().substring(0,1),getX(), getY()-(2*z))&&!isInCurrent(getTag().substring(0,1),getX(),getY()-z)&&!isInOpposite(getTag().substring(0,1),getX(), getY()-z)){//if no moves have been made then pushing by 2 is legal
                 addPossibleMoves(getX(),getY()-(z*2),"normal");
-            }   
         }
     }
-    
     /**
-     * Returns the piece at position on board
-     * @param x x coordinate
-     * @param y y coordinate
-     * @return returns piece tag if there is a piece, and 00000 otherwise
+     * Used to return the Board value, or the tag, at a given location, used in panw moves and king moves 
+     * @param x x coordinate 
+     * @param y y coordinate 
+     * @return the tag of the piece at the given square 
      */
-    public String returnPiece(int x, int y){
+    public Piece returnPiece(int x, int y){
         
         if(checkbounds(x, y)){
             return boards.getBoard()[y][x];   
             
         }
-        return "00000";
+        return null;
     }
-    
     /**
-     * checks if a potential move is in the current color, in meaning that square is occupied by a piece from the same color, uses methods isInWhite and isInBlack
-     * @param color color of the piece
-     * @param x x coordinate
-     * @param y y coordinate
-     * @return returns true if potential move is in the current color, false if otherwise 
+     * We might want to consider moving this class to Board 
+ This class tells us whether a piece of the same color is occupying a square that a piece is already in, used to test if a move will result 
+ in a move to a square that has a piece of the same color 
+     * @param color The color of the piece that we want to move 
+     * @param x
+     * @param y
+     * @return 
      */
-    public boolean isInCurrent(String color, int x, int y){
+    public boolean isInCurrent(String color, int x, int y){//checks if a potential move is in the current color, in meaning that square is occupied by a piece from the same color 
         if(color.equals("w")&&boards.isInWhite(x,y)){
             return true;
         }else if(color.equals("b")&&boards.isInBlack(x,y)){
@@ -457,16 +583,7 @@ public class Piece {//all other pieces are extensions of this class, contains al
             return false;
         }
     }
-    
-    
-    /**
-     * checks if a potential move is in the opposite color 
-     * @param color color of the piece
-     * @param x x coordinate
-     * @param y y coordinate
-     * @return returns true if potential move is in opposite color, false otherwise
-     */
-    public boolean isInOpposite(String color, int x, int y){
+    public boolean isInOpposite(String color, int x, int y){//checks if a potential move is in the opposite oclor 
         if(color.equals("w")&&boards.isInBlack(x,y)){
             return true;
         }else if(color.equals("b")&&boards.isInWhite(x,y)){
@@ -475,11 +592,6 @@ public class Piece {//all other pieces are extensions of this class, contains al
             return false;
         }
     }
-    
-    /**
-     * adds possible moves of the knight if they are legal
-     * @param color color of piece
-     */
     public void knightMoves(String color){//knights moves, no loops needed for this 
         if(checkbounds(getX()+1,getY()+2)&&!isInCurrent(color,getX() + 1, getY() + 2)){//if the move is not in the current color, then it is allowed 
                addPossibleMoves(getX() + 1,getY() + 2,"normal");  //checks all 8 knight vectors 
@@ -506,9 +618,31 @@ public class Piece {//all other pieces are extensions of this class, contains al
                addPossibleMoves(getX() - 2,getY() + 1,"normal");
             }
     }
+
+    public void checkLegalMove(){
+        switch(tag.charAt(1)){
+            case 'Q':
+                queenMoves(false,tag.substring(0,1));
+                break;
+            case 'R':
+                rookMoves(false,tag.substring(0,1));
+                break;
+            case 'B':
+                bishopMoves(false,tag.substring(0,1));
+                break;
+            case 'H':
+                knightMoves(tag.substring(0,1));
+                break;
+            case 'P':
+                pawnMoves();
+                break;
+            case 'K':
+                queenMoves(true,tag.substring(0,1));
+                break;
+                
+        }
+    }
 }
-
-
 
 
 
