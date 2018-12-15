@@ -3,24 +3,32 @@
 package chess2;
 
 public class Pawn extends Piece{
-    String tagRight;
-    String tagLeft;
+    Piece tagRight;
+    Piece tagLeft;
     
     /**
      * This is the pawn object
-     * @param boards common board
+     * @param boards common Board
      * @param x x coordinate
      * @param y y coordinate
      * @param id piece id
      * @param color color of piece
      */
-    public Pawn(board boards, int x, int y, int id, char color){
+    public Pawn(Board boards, int x, int y, int id, char color){
         setup(boards, x,y,id,color);//uses base constructor
         setTag(id,"P",color);//tag is just for display mainly, but also used for now, once we have graphics we can transition out
     }    
     
     /**
      * Checks to see if it is a legal move, handled promotion as well as en passant
+     * When promotion occurs the tag of the piece changes to reflect the new type it is so based off of this we can run a switch statement to determine 
+     * what type of moves we should consider, if it was promoted to a queen look at queen moves, bishop run bishop moves, etc.
+     * If there was no promotion then run pawn moves and also look for enpassant which is one of the special cases that was written into pawn 
+     * Enpassant works by making sure the movecount is zero, then using the moverecorder arraylist that is built into every piece and creating a variable
+     * that we can use for later to make sure that the last piece was the pawn that we want to perform enpassant on 
+     * Finally, squares next to the pawn are pawns of the opposite color, and they have the correct Y location, and the movement there was their first move
+     * and the last move that was made, enpassant becomes a legal move and we give it a move message(the second parameter in addPossibleMoves()
+     * of enpassant so that we can handle it properly 
      */
     public void checkLegalMove(){ 
         switch (tag.charAt(1)) {
@@ -51,7 +59,7 @@ public class Pawn extends Piece{
                     //enpassant to the right
                     if(checkbounds(getX()-1,getY()-1)&&getY()==3&&!boards.isInWhite(getX()-1,getY()-1)&&!boards.isInBlack(getX()-1, getY()-1)){
                         {
-                            if(tagRight.charAt(1)=='P'&&Integer.parseInt(tagRight.substring(4))==1&&getLastMoveTag().equals(tagRight.substring(0,4))){
+                            if(tagRight.getTag().charAt(1)=='P'&&Integer.parseInt(tagRight.getTag().substring(4))==1&&getLastMoveTag().equals(tagRight.getTag().substring(0,4))){
                                 addPossibleMoves(getX()-1,getY()-1,"enpassant");
                                 // Chess2.boards[getX()+1][getY()] = "00000";
                             }
@@ -60,7 +68,7 @@ public class Pawn extends Piece{
                     }
                     //enpassant to the left, not completed
                     if(checkbounds(getX()+1,getY()-1)&&getY()==3&&!boards.isInWhite(getX()+1,getY()-1)&&!boards.isInBlack(getX()+1, getY()-1)){
-                        if(tagLeft.charAt(1)=='P'&&Integer.parseInt(tagLeft.substring(4))==1&&getLastMoveTag().equals(tagLeft.substring(0,4))){
+                        if(tagLeft.getTag().charAt(1)=='P'&&Integer.parseInt(tagLeft.getTag().substring(4))==1&&getLastMoveTag().equals(tagLeft.getTag().substring(0,4))){
                             addPossibleMoves(getX()+1,getY()-1,"enpassant");
                         }
                     }
@@ -70,7 +78,7 @@ public class Pawn extends Piece{
                     //enpassant to the right
                     if(checkbounds(getX()-1,getY()+1)&&getY()==4&&!boards.isInBlack(getX()-1,getY()+1)&&!boards.isInWhite(getX()-1, getY()+1)){
                         {
-                            if(tagRight.charAt(1)=='P'&&Integer.parseInt(tagRight.substring(4))==1&&getLastMoveTag().equals(tagRight.substring(0,4))){
+                            if(tagRight.getTag().charAt(1)=='P'&&Integer.parseInt(tagRight.getTag().substring(4))==1&&getLastMoveTag().equals(tagRight.getTag().substring(0,4))){
                                 
                                 
                                 addPossibleMoves(getX()-1,getY()+1,"enpassant");
@@ -81,7 +89,7 @@ public class Pawn extends Piece{
                     }
                     //enpassant to the left, not completed
                     if(checkbounds(getX()+1,getY()-1)&&getY()==4&&!boards.isInWhite(getX()+1,getY()+1)&&!boards.isInBlack(getX()+1, getY()+1)){
-                        if(tagLeft.charAt(1)=='P'&&Integer.parseInt(tagLeft.substring(4))==1&&getLastMoveTag().equals(tagLeft.substring(0,4))){
+                        if(tagLeft.getTag().charAt(1)=='P'&&Integer.parseInt(tagLeft.getTag().substring(4))==1&&getLastMoveTag().equals(tagLeft.getTag().substring(0,4))){
                             addPossibleMoves(getX()+1,getY()+1,"enpassant");
                         }
                     }
@@ -89,3 +97,4 @@ public class Pawn extends Piece{
         }
     }
 }
+
