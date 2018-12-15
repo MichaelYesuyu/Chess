@@ -1,1 +1,136 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package chess2;
+
+/**
+ *
+ * @author sye-21
+ */
+
+import java.util.*;
+import java.io.*;
+
+//probably extends the player class
+public class Opening extends Player{
+    
+       
+    String whiteMove = "";
+    String blackMove = "";
+    
+    //the ArrayList formating should be white move followed by space followed by black move
+    ArrayList<String> allMoves = new ArrayList<String>(); //stores all the moves made in an arrayList, in chess notation
+    
+    public Opening(String whiteMove, String blackMove){
+        this.whiteMove = whiteMove;
+        this.blackMove = blackMove;
+    }
+    
+    /**
+     * This class picks the move based on a text file
+     * Need to at char as a parameter later for color of piece but not included due to testing purposes
+     * @param moveNumber the current move number
+     * @return returns the move to play to movePick (which doesn't exist yet)
+     */
+    public String PickMove(int moveNumber){
+ 
+    BufferedReader in = null;
+    
+     File file = new File("OpeningRepretoire.txt"); //this file contains the opening repretoires, each line is one opening
+        
+     if(!file.exists()){ //tests to see if the file exists
+           System.out.println("error");
+       }
+     
+     String line = null;
+     String moveToPlay = "";
+     String compareMoveLine = "";
+     String newMoveLine = "";
+     String integerToString;
+     int display = 1;
+     String returnThis = "00";
+     
+     boolean keepGoingDown = false; //stops looking down at the next line of the text file unless "granted permission"
+     
+       try
+      { 
+           in = new BufferedReader ( 
+                new FileReader (file));
+           
+        for(int i = 1; i<=moveNumber; i+=2){
+            integerToString = Integer.toString(display);
+            newMoveLine = integerToString + ". " + allMoves.get(i-1) + " " + allMoves.get(i) + " ";
+            compareMoveLine = compareMoveLine + newMoveLine;
+            //System.out.println(compareMoveLine);
+            display ++;
+        }
+        
+        
+           
+        while(!keepGoingDown&&( line = in.readLine() ) != null ){
+    
+            //compares the length of the line to the length of the currentMoveLine, if currentMoveLine is longer program skips this line
+            System.out.println(line.length()>compareMoveLine.length());
+            if(line.length()>compareMoveLine.length()){
+               
+                System.out.println(line.substring(0,compareMoveLine.length()));
+                System.out.println(compareMoveLine);
+                System.out.println(line.substring(0,compareMoveLine.length()).equals(compareMoveLine));
+                
+                if (line.substring(0,compareMoveLine.length()).equals(compareMoveLine)){//if the current line contains the current moveLine 
+                    //what to do if opening matches up with an opening in the repretoire
+                    
+                    System.out.println(line.indexOf("."));
+                    System.out.println(compareMoveLine.length());
+                    System.out.println(line.indexOf(".", compareMoveLine.length()+2));
+                    int indexOfDot = line.indexOf(".",compareMoveLine.length()+3);
+                    
+                    if(indexOfDot!=-1){
+                    
+                    returnThis = line.substring(compareMoveLine.length(), indexOfDot - 2);
+                    }
+                    else{
+                        returnThis = line.substring(compareMoveLine.length());
+                    }
+                    
+                    }
+                    
+                    System.out.println(returnThis);
+                    return returnThis;
+            
+        }
+       }
+        
+       
+       in.close();
+       System.out.println("00000"); //test code
+       return "00000"; //returns something to show that there is not a match, and the program instead utilizes 
+
+       
+       }
+        
+        catch (IOException e)
+        {
+            System.out.println("Error");
+        }
+        return ""; //temporary code
+    }
+    
+    /**
+     * The main method is just for testing the program
+     */
+//    public static void main(String [] args){
+//        Opening opening = new Opening("","");
+//        opening.allMoves.add("e4");
+//        opening.allMoves.add("e5");
+//        opening.allMoves.add("Nf3");
+//        opening.allMoves.add("Nc6");
+//        opening.PickMove(4);
+//      
+//    }
+    
+}
+
 
