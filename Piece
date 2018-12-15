@@ -9,7 +9,7 @@ public class Piece {//all other pieces are extensions of this class, contains al
     int id, x, y,x1,y1 , value, movecount =0;//special is for castlening an en passant, id stores the id of the piece, x and y the current coordinates
     //x1 and y1 store the previous coordinates so that movement isn't so hard to do, value could be used later, and movecount is for castleing and pawns
     boolean alive = true;//not needed was just a test but we can change later
-    board boards;//gets the current board
+    Board boards;//gets the current Board
     String tag = "";
     ArrayList<Integer> possiblemovesX = new ArrayList<>();//stores all the potential x coordinates of a move 
     ArrayList<Integer> possiblemovesY = new ArrayList<>();//stores all the potential y coordinates of a move
@@ -29,8 +29,8 @@ public class Piece {//all other pieces are extensions of this class, contains al
      * @param id piece id
      * @param color color - black or white
      */
-    public void setup(board boards, int x, int y, int id, char color){
-        this.boards = boards;//makes sure that the board is the common board
+    public void setup(Board boards, int x, int y, int id, char color){
+        this.boards = boards;//makes sure that the Board is the common Board
         this.x = x;//setting up variables
         this.y = y;
         this.id = id;
@@ -126,10 +126,10 @@ public class Piece {//all other pieces are extensions of this class, contains al
     }
     
     /**
-     * checks if a piece or a move is on the board so no out of bounds errors occur 
+     * checks if a piece or a move is on the Board so no out of bounds errors occur 
      * @param x x coordinate
      * @param y y coordinate
-     * @return returns true if the coordinates are inside the board, false otherwise
+     * @return returns true if the coordinates are inside the Board, false otherwise
      */
     public boolean checkbounds(int x, int y){
         if(x>-1&&x<8&&y>-1&&y<8){
@@ -420,14 +420,14 @@ public class Piece {//all other pieces are extensions of this class, contains al
         if(checkbounds(getX(),getY()-z)&&!boards.isInWhite(getX(),getY()-z)&&!boards.isInBlack(getX(), getY()-z)){//if no black or white pawns in the way then pushing forward one is legal
             
             addPossibleMoves(getX(),getY()-z,"normal");
-            if(movecount==0&&!boards.isInWhite(getX(),getY()-z)&&!boards.isInBlack(getX(), getY()-(2*z))){//if no moves have been made then pushing by 2 is legal
+            if(movecount==0&&!boards.isInWhite(getX(),getY()-2*z)&&!boards.isInBlack(getX(), getY()-(2*z))){//if no moves have been made then pushing by 2 is legal
                 addPossibleMoves(getX(),getY()-(z*2),"normal");
             }   
         }
     }
     
     /**
-     * Returns the piece at position on board
+     * Returns the piece at position on Board
      * @param x x coordinate
      * @param y y coordinate
      * @return returns piece tag if there is a piece, and 00000 otherwise
