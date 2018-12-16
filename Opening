@@ -3,6 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
+
+/**
+ *
+ * @author vshah-21
+ */
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package chess2;
 
 /**
@@ -14,9 +25,9 @@ import java.util.*;
 import java.io.*;
 
 //probably extends the player class
-public class Opening extends Engine{
+public class Opening {
     
-       
+    int count = 0; 
     String whiteMove = "";
     String blackMove = "";
     
@@ -38,7 +49,7 @@ public class Opening extends Engine{
  
     BufferedReader in = null;
     
-     File file = new File("OpeningRepretoire.txt"); //this file contains the opening repretoires, each line is one opening
+     File file = new File("D:\\MyProfile\\Documents\\NetBeansProjects\\chess2\\src\\chess2\\OpeningRepretoire.txt"); //this file contains the Opening repretoires, each line is one Opening
         
      if(!file.exists()){ //tests to see if the file exists
            System.out.println("error");
@@ -59,10 +70,10 @@ public class Opening extends Engine{
            in = new BufferedReader ( 
                 new FileReader (file));
            
-        for(int i = 1; i<=moveNumber; i+=2){
-            integerToString = Integer.toString(display);
-            newMoveLine = integerToString + ". " + allMoves.get(i-1) + " " + allMoves.get(i) + " ";
-            compareMoveLine = compareMoveLine + newMoveLine;
+        for(int i = 0; i<moveNumber; i++){
+            
+            compareMoveLine = compareMoveLine + allMoves.get(i) + " ";//always add a space as we never want an opening without a next move
+            System.out.println(compareMoveLine);
             //System.out.println(compareMoveLine);
             display ++;
         }
@@ -70,42 +81,58 @@ public class Opening extends Engine{
         
            
         while(!keepGoingDown&&( line = in.readLine() ) != null ){
-    
-            //compares the length of the line to the length of the currentMoveLine, if currentMoveLine is longer program skips this line
-            System.out.println(line.length()>compareMoveLine.length());
-            if(line.length()>compareMoveLine.length()){
-               
-                System.out.println(line.substring(0,compareMoveLine.length()));
-                System.out.println(compareMoveLine);
-                System.out.println(line.substring(0,compareMoveLine.length()).equals(compareMoveLine));
-                
-                if (line.substring(0,compareMoveLine.length()).equals(compareMoveLine)){//if the current line contains the current moveLine 
-                    //what to do if opening matches up with an opening in the repretoire
-                    
-                    System.out.println(line.indexOf("."));
-                    System.out.println(compareMoveLine.length());
-                    System.out.println(line.indexOf(".", compareMoveLine.length()+2));
-                    int indexOfDot = line.indexOf(".",compareMoveLine.length()+3);
-                    
-                    if(indexOfDot!=-1){
-                    
-                    returnThis = line.substring(compareMoveLine.length(), indexOfDot - 2);
-                    }
-                    else{
-                        returnThis = line.substring(compareMoveLine.length());
-                    }
-                    
-                    }
-                    
-                    System.out.println(returnThis);
-                    return returnThis;
+            boolean handlingLine = false;
+            int startingIndex = -1; 
             
+            for(int i =0; i < line.length(); i++){
+                if(line.length()>i+4&&line.substring(i,i+4).equals("\"m\":")&&!handlingLine){
+                    //System.out.println("truth man we are truth ");
+                    handlingLine = true;
+                    startingIndex = i+6;
+                    count++;
+                }
+            }   
+            //compares the length of the line to the length of the currentMoveLine, if currentMoveLine is longer program skips this line
+            //System.out.println(line.length()>compareMoveLine.length());
+            if(line.length()>compareMoveLine.length()){
+               if(handlingLine&&startingIndex+compareMoveLine.length()<line.length()){
+                   
+               }
+                
+                if (handlingLine&&startingIndex+compareMoveLine.length()<line.length()&&line.substring(startingIndex,startingIndex + compareMoveLine.length()).equals(compareMoveLine)){//if the current line contains the current moveLine 
+                    //what to do if Opening matches up with an Opening in the repretoire
+                    System.out.println("the part of the line that we are looking at " + line.substring(startingIndex,startingIndex+compareMoveLine.length()));
+                    System.out.println("the part that we want to compare to  " + compareMoveLine);
+                    System.out.println("are they equal? " + line.substring(startingIndex,startingIndex+compareMoveLine.length()).equals(compareMoveLine));
+                    System.out.println("line: " + line);
+                    boolean handle = false;
+                    String returns = "";
+                    int constant = startingIndex + compareMoveLine.length();
+                    int count= 0;
+                    while(!handle){
+                        if(count+constant>=line.length()||line.charAt(count+constant)==' '){
+                            handle = true;
+                            System.out.println("something");
+                        }else{
+                            returns += line.charAt(count+constant);
+                        }
+                        count++;
+                    }
+                    //System.out.println(returnThis);
+                    System.out.println(returns);
+                    keepGoingDown=true;
+                }else{
+                    
+                    //we want to see what one exampe looks liek 
+                }
         }
+          
        }
         
        
        in.close();
        System.out.println("00000"); //test code
+       System.out.println(count);
        return "00000"; //returns something to show that there is not a match, and the program instead utilizes 
 
        
@@ -121,15 +148,29 @@ public class Opening extends Engine{
     /**
      * The main method is just for testing the program
      */
-//    public static void main(String [] args){
-//        Opening opening = new Opening("","");
-//        opening.allMoves.add("e4");
-//        opening.allMoves.add("e5");
-//        opening.allMoves.add("Nf3");
-//        opening.allMoves.add("Nc6");
-//        opening.PickMove(4);
-//      
-//    }
+    public static void main(String [] args){
+        Opening opening = new Opening("","");
+        opening.allMoves.add("d2d4");
+        opening.allMoves.add("g8f6");
+        opening.allMoves.add("c2c4");
+        opening.allMoves.add("g7g6");
+        opening.allMoves.add("b1c3");
+        opening.allMoves.add("f8g7");
+        opening.allMoves.add("e2e4");
+        opening.allMoves.add("d7d6");
+        opening.allMoves.add("g1f3");
+        opening.allMoves.add("e8g8");
+        opening.allMoves.add("f1e2");
+        opening.allMoves.add("e7e5");
+        opening.allMoves.add("e1g1");
+        opening.allMoves.add("b8c6");
+        opening.allMoves.add("d4d5");
+        opening.allMoves.add("c6e7");
+        opening.allMoves.add("f3e1");
+        opening.allMoves.add("f6d7");
+        //d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8g8 f1e2 e7e5 e1g1 b8c6 d4d5 c6e7 f3e1 f6d7
+        opening.PickMove(18);
+   
+    }
     
 }
-
