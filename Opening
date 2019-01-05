@@ -25,18 +25,17 @@ import java.util.*;
 import java.io.*;
 
 //probably extends the player class
-public class Opening {
+public class Opening extends Engine{
     
     int count = 0; 
     String whiteMove = "";
     String blackMove = "";
     
     //the ArrayList formating should be white move followed by space followed by black move
-    ArrayList<String> allMoves = new ArrayList<String>(); //stores all the moves made in an arrayList, in chess notation
+   
     
-    public Opening(String whiteMove, String blackMove){
-        this.whiteMove = whiteMove;
-        this.blackMove = blackMove;
+    public Opening(){
+        //empty constructor
     }
     
     /**
@@ -45,11 +44,12 @@ public class Opening {
      * @param moveNumber the current move number
      * @return returns the move to play to movePick (which doesn't exist yet)
      */
-    public String PickMove(int moveNumber){
- 
+    public String PickMove(){
+    
+    
     BufferedReader in = null;
     
-     File file = new File("D:\\MyProfile\\Documents\\NetBeansProjects\\chess2\\src\\chess2\\OpeningRepretoire.txt"); //this file contains the Opening repretoires, each line is one Opening
+     File file = new File("OpeningRepretoire.txt"); //this file contains the Opening repretoires, each line is one Opening
         
      if(!file.exists()){ //tests to see if the file exists
            System.out.println("error");
@@ -70,10 +70,11 @@ public class Opening {
            in = new BufferedReader ( 
                 new FileReader (file));
            
-        for(int i = 0; i<moveNumber; i++){
+        for(int i = 0; i<allMoves.size(); i++){
+            
             
             compareMoveLine = compareMoveLine + allMoves.get(i) + " ";//always add a space as we never want an opening without a next move
-            System.out.println(compareMoveLine);
+            System.out.println("---"+compareMoveLine);
             //System.out.println(compareMoveLine);
             display ++;
         }
@@ -83,12 +84,14 @@ public class Opening {
         while(!keepGoingDown&&( line = in.readLine() ) != null ){
             boolean handlingLine = false;
             int startingIndex = -1; 
+            int endingIndex = -1;
             
             for(int i =0; i < line.length(); i++){
                 if(line.length()>i+4&&line.substring(i,i+4).equals("\"m\":")&&!handlingLine){
                     //System.out.println("truth man we are truth ");
                     handlingLine = true;
                     startingIndex = i+6;
+                    endingIndex = line.length()-3;
                     count++;
                 }
             }   
@@ -110,7 +113,7 @@ public class Opening {
                     int constant = startingIndex + compareMoveLine.length();
                     int count= 0;
                     while(!handle){
-                        if(count+constant>=line.length()||line.charAt(count+constant)==' '){
+                        if(count+constant>=line.length()||line.charAt(count+constant)==' '||line.charAt(count+constant)=='"'){
                             handle = true;
                             System.out.println("something");
                         }else{
@@ -121,21 +124,18 @@ public class Opening {
                     //System.out.println(returnThis);
                     System.out.println(returns);
                     keepGoingDown=true;
+                    return returns;
                 }else{
                     
                     //we want to see what one exampe looks liek 
                 }
-        }
-          
+           }
        }
-        
-       
        in.close();
-       System.out.println("00000"); //test code
        System.out.println(count);
        return "00000"; //returns something to show that there is not a match, and the program instead utilizes 
 
-       
+                                                                                                                                  
        }
         
         catch (IOException e)
@@ -144,33 +144,4 @@ public class Opening {
         }
         return ""; //temporary code
     }
-    
-    /**
-     * The main method is just for testing the program
-     */
-    public static void main(String [] args){
-        Opening opening = new Opening("","");
-        opening.allMoves.add("d2d4");
-        opening.allMoves.add("g8f6");
-        opening.allMoves.add("c2c4");
-        opening.allMoves.add("g7g6");
-        opening.allMoves.add("b1c3");
-        opening.allMoves.add("f8g7");
-        opening.allMoves.add("e2e4");
-        opening.allMoves.add("d7d6");
-        opening.allMoves.add("g1f3");
-        opening.allMoves.add("e8g8");
-        opening.allMoves.add("f1e2");
-        opening.allMoves.add("e7e5");
-        opening.allMoves.add("e1g1");
-        opening.allMoves.add("b8c6");
-        opening.allMoves.add("d4d5");
-        opening.allMoves.add("c6e7");
-        opening.allMoves.add("f3e1");
-        opening.allMoves.add("f6d7");
-        //d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8g8 f1e2 e7e5 e1g1 b8c6 d4d5 c6e7 f3e1 f6d7
-        opening.PickMove(18);
-   
-    }
-    
 }
