@@ -1,1 +1,51 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package chess2;
+
+/**
+ *
+ * @author sye-21
+ */
+
+import java.util.*;
+
+public class Engine {
+   
+     ArrayList<String> allMoves = new ArrayList<String>(); //stores all the moves made in an arrayList, in chess notation
+    
+    public String chooseMove(){
+        
+        Opening O1 = new Opening();
+        
+        String moveToPlay = O1.PickMove();
+        
+        if(moveToPlay.equals("00000")){
+            return "NoOpeningMovesLeft";
+        }
+        else{
+        
+        return moveToPlay;
+        }
+        
+    }
+    
+    public static void main(String [] args){
+        Opening opening = new Opening();
+        while(true){
+        
+        
+        System.out.println("Enter move");
+        Scanner S1 = new Scanner(System.in);
+        String enteredMove = S1.nextLine();
+        opening.allMoves.add(enteredMove);
+        
+        System.out.println("Computer played "+ opening.PickMove());
+        opening.allMoves.add(opening.PickMove());
+        
+        }
+    }
+}
 
