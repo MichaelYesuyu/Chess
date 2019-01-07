@@ -1,1 +1,64 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package chess2;
+
+/**
+ * This class is evaluation, where it calculates each position and figures out their value, then sends it to MovePick
+ * @author sye-21
+ */
+
+//in player class needs something that counts the number of pieces
+
+public class Evaluation extends Engine{
+    public int getValueWhitePieces(int numPawn, int numKnight, int numBishop, int numRook, int numQueen){
+        return numPawn*1 + numKnight*3 + numBishop*3 + numRook*5 + numQueen*9;
+    }
+    
+    public int getValueBlackPieces(int numPawn, int numKnight, int numBishop, int numRook, int numQueen){
+        return numPawn*1 + numKnight*3 + numBishop*3 + numRook*5 + numQueen*9;
+    }
+    
+    public int getValueWhiteSpace(){
+        return 0; //temp code
+    }
+    
+    public int getValueBlackSpace(){
+        return 0; //temp code
+    }
+    
+    public int getWhiteControlOfCenter(){
+        return 0; //temp code
+    }
+    
+    public int getBlackControlOfCenter(){
+        return 0; //temp code
+    }
+    
+    public boolean canCheckmateWhite(){
+        return true; //temp code
+    }
+    
+    public boolean canCheckmateBlack(){
+        return true; //temp code
+    }
+    
+    public int safetyWhiteKing(){
+        return 0; //temp code
+    }
+    
+    public int safetyBlackKing(){
+        return 0; //temp code
+    }
+    
+    public int totalValueOfPositionWhite(){
+        return 0; //temp code
+    }
+    
+    public int totalValueOfPositionBlack(){
+        return 0; //temp code
+    }
+}
 
