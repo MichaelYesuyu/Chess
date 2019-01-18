@@ -79,6 +79,9 @@ public class Piece {//all other pieces are extensions of this class, contains al
         }
         movecount++;
     }
+    public void editMoveCount(int edit){
+        this.movecount = edit;
+    }
     public int getX(){//returns the curretn x and y
         return this.x;
     }
@@ -168,22 +171,35 @@ public class Piece {//all other pieces are extensions of this class, contains al
         setMoveCount();//increments move count, for castling and pushing the pawn
         //clears the movelist so that no overlap of moves occurs
     }
-    
+    /**
+     * moves the piece to the old location that it was at 
+     */
+    public void flipLoc(){
+        int storedX = this.getX();
+        int storedY = this.getY();
+        setX(getX1());
+        setY(getY1());
+        setX1(storedX);
+        setY1(storedY);
+        boards.getBoard()[getY()][getX()] = getTag();
+        boards.getBoard()[getY1()][getX1()] = "00000";
+    }
     /**
      * The main movement method checks if the move made is in possible moves and edits piece based on it 
      * @param x x coordinate
      * @param y y coordinate
      * @return Returns an integer based on situation to be handled inside process move in the main method
      */
+
     public int checkPossibleMoves(int x, int y){//
         
         for(int i =0; i < possiblemovesX.size();i++){//loops through all pairs of possible moves 
             if(special.get(i).equals("normal")){
                 if(possiblemovesX.get(i)==x&&possiblemovesY.get(i)==y&&checkbounds(x,y)){//if the move made is possible 
                     
-                        
-                    
                     moveChanges(x,y);
+                   boards.getBoard()[getY()][getX()]=getTag();
+                   boards.getBoard()[getY1()][getX1()]="00000";
                     totalMoveCount++;
                     boards.moveRecorderAdd(getTag()+getY1()+getX1()+getY()+getX());//adds the moves to the list of recorded moves 
                     setMoveRecorder(boards.moveRecorder);
