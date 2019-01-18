@@ -1,0 +1,702 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package chess2;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
+
+/**
+ *
+ * @author vshah-21
+ */
+public class AI{
+    int state;
+    Board board;
+    Player player;
+    Player enemy;
+    ArrayList<String> allMoves = new ArrayList<String>(); //stores all the moves made in an arrayList, in chess notation
+    int count = 0; 
+    String whiteMove = "";
+    String blackMove = "";
+   
+
+    public AI(Player player, Board board, Player enemy){
+        this.player = player;
+        this.board = board;
+        this.enemy = enemy;
+        state = 0; 
+    }
+    public String PickOpeningMove(){
+    
+    BufferedReader in = null;
+    
+     File file = new File("OpeningRepretoire.txt"); //this file contains the Opening repretoires, each line is one Opening
+        
+     if(!file.exists()){ //tests to see if the file exists
+           System.out.println("error have no maybe so");
+       }
+     
+     String line = null;
+     String moveToPlay = "";
+     String compareMoveLine = "";
+     String newMoveLine = "";
+     String integerToString;
+     int display = 1;
+     String returnThis = "00";
+     
+     boolean keepGoingDown = false; //stops looking down at the next line of the text file unless "granted permission"
+     
+       try
+      { 
+           in = new BufferedReader ( 
+                new FileReader (file));
+           
+        for(int i = 0; i<allMoves.size(); i++){
+            
+            System.out.println("runnign here");
+            compareMoveLine = compareMoveLine + allMoves.get(i) + " ";//always add a space as we never want an opening without a next move
+            //System.out.println("---"+compareMoveLine);
+            //System.out.println(compareMoveLine);
+            display ++;
+        }
+        
+        
+           
+        while(!keepGoingDown&&( line = in.readLine() ) != null ){
+            boolean handlingLine = false;
+            int startingIndex = -1; 
+            int endingIndex = -1;
+            
+            for(int i =0; i < line.length(); i++){
+                if(line.length()>i+4&&line.substring(i,i+4).equals("\"m\":")&&!handlingLine){
+                    //System.out.println("truth man we are truth ");
+                    handlingLine = true;
+                    startingIndex = i+6;
+                    endingIndex = line.length()-3;
+                    count++;
+                }
+            }   
+            
+            //compares the length of the line to the length of the currentMoveLine, if currentMoveLine is longer program skips this line
+            //System.out.println(line.length()>compareMoveLine.length());
+            if(line.length()>compareMoveLine.length()){
+                
+               if(handlingLine&&startingIndex+compareMoveLine.length()<line.length()){
+                   
+               }
+               
+               if(line.substring(startingIndex,startingIndex+5).equals("e2e4")){
+                   System.out.println("recognizing");
+               }
+                
+                if (handlingLine&&startingIndex+compareMoveLine.length()<line.length()&&line.substring(startingIndex,startingIndex + compareMoveLine.length()).equals(compareMoveLine)){//if the current line contains the current moveLine 
+                    //what to do if Opening matches up with an Opening in the repretoire
+                     System.out.println("the part of the line that we are looking at " + line.substring(startingIndex,startingIndex+compareMoveLine.length()));
+                     System.out.println("the part that we want to compare to  " + compareMoveLine);
+                     System.out.println("are they equal? " + line.substring(startingIndex,startingIndex+compareMoveLine.length()).equals(compareMoveLine));
+                    System.out.println("line: " + line);
+                    boolean handle = false;
+                    String returns = "";
+                    int constant = startingIndex + compareMoveLine.length();
+                    int count= 0;
+                    while(!handle){
+                        if(count+constant>=line.length()||line.charAt(count+constant)==' '||line.charAt(count+constant)=='"'){
+                            handle = true;
+                            //System.out.println("something");
+                        }else{
+                            returns += line.charAt(count+constant);
+                        }
+                        count++;
+                    }
+                    //System.out.println(returnThis);
+                    System.out.println("hi returns " + returns);
+                    keepGoingDown=true;
+                    return returns;
+                }else{
+                    
+                    //we want to see what one exampe looks like 
+                }
+           }
+       }
+       in.close();
+       //System.out.println(count);
+       return "00000"; //returns something to show that there is not a match, and the program instead utilizes eval
+
+                                                                                                                                  
+       }
+        
+        catch (IOException e)
+        {
+            System.out.println("Error");
+        }
+        return ""; //temporary code
+    }
+    
+    public int LetterToInt(String x){
+        switch(x){
+            case "a":
+                return 0;
+            case "b":
+                return 1;
+            case "c":
+                return 2;
+            case "d":
+                return 3;
+            case "e":
+                return 4;
+            case "f":
+                return 5;
+            case "g":
+                return 6;
+            case "h":
+                return 7;
+            default:
+                return 00000;
+        }
+    }
+    
+    public String IntToLetter(int x){
+        switch(x){
+            case 0:
+                return "a";
+            case 1:
+                return "b";
+            case 2:
+                return "c";
+            case 3:
+                return "d";
+            case 4:
+                return "e";
+            case 5:
+                return "f";
+            case 6:
+                return "g";
+            case 7:
+                return "h";
+            default:
+                return "00000";
+        }
+    }
+    
+    public int InverseInt (int inverse){
+        switch(inverse){
+            case 0:
+                return 7;
+            case 1:
+                return 6;
+            case 2:
+                return 5;
+            case 3:
+                return 4;
+            case 4:
+                return 3;
+            case 5:
+                return 2;
+            case 6:
+                return 1;
+            case 7:
+                return 0;
+            default:
+                return 00000;
+        }
+    }
+    
+    public void openingMove(){
+        System.out.println("running");
+        
+        if(!PickOpeningMove().equals("00000")){
+                String movePicked = PickOpeningMove(); //movePicked is a string which opening repretoire plays. example is d2d4
+                allMoves.add(movePicked);
+                
+                int locX = LetterToInt(movePicked.substring(0,1));
+                
+                int locY = InverseInt(Integer.valueOf(movePicked.substring(1,2)) - 1);
+                System.out.println("locX " + locX + " locY " + locY);
+                String tag = board.getBoard()[locY][locX];
+                System.out.println(tag);
+                char type = tag.charAt(1);
+                int newLocX = LetterToInt(movePicked.substring(2,3));
+                int newLocY = InverseInt(Integer.valueOf(movePicked.substring(3,4)) - 1);
+                System.out.println("newLocX " + newLocX + " newLocY " + newLocY );
+                        
+                
+                System.out.println(type);
+                switch(type){
+                    
+                    case 'P':
+                        for(int i =0 ; i< 8; i++){
+                            if(player.pawns[i].getX()==locX&&player.pawns[i].getY()==locY){
+                                player.pawns[i].checkLegalMove();
+                                player.pawns[i].checkPossibleMoves(newLocX,newLocY);
+                                board.switchTurn();
+                            }
+                        }
+                        break;
+                    case 'B':
+                        for(int i =0 ; i< 2; i++){
+                            if(player.bishops[i].getX()==locX&&player.bishops[i].getY()==locY){
+                                player.bishops[i].checkLegalMove();
+                                player.bishops[i].checkPossibleMoves(newLocX,newLocY);
+                                board.switchTurn();
+                            }
+                        }
+                        break;
+                    case 'R':
+                        for(int i =0 ; i< 2; i++){
+                            if(player.rooks[i].getX()==locX&&player.rooks[i].getY()==locY){
+                                player.rooks[i].checkLegalMove();
+                                player.rooks[i].checkPossibleMoves(newLocX,newLocY);
+                                board.switchTurn();
+                            }
+                        }
+                        break;
+                    case 'H':
+                        for(int i =0 ; i< 2; i++){
+                            if(player.knights[i].getX()==locX&&player.knights[i].getY()==locY){
+                                player.knights[i].checkLegalMove();
+                                player.knights[i].checkPossibleMoves(newLocX,newLocY);
+                                board.switchTurn();
+                            }
+                        }
+                        break;
+                     case 'Q':
+                        
+                            if(player.queen.getX()==locX&&player.queen.getY()==locY){
+                                player.queen.checkPossibleMoves(newLocX,newLocY);
+                            }
+                        
+                        break;
+                    case 'K':
+                       
+                            if(player.king.getX()==locX&&player.king.getY()==locY){
+                                player.king.checkPossibleMoves(newLocX,newLocY);
+                            }
+                        
+                        break;
+                }
+                
+        
+                
+            }
+        else{
+            state=1;
+            smartMove();
+        }
+    }
+    public void addMove(){
+        String stored = board.getMoveRecorder().get(board.getMoveRecorder().size()-1);//tagy1x1yx
+        String x1 = IntToLetter(Integer.valueOf(stored.substring(6,7)));
+        String x= IntToLetter(Integer.valueOf(stored.substring(8,9)));
+        String y1= String.valueOf(8-Integer.valueOf(stored.substring(5,6)));
+        String y = String.valueOf(8-Integer.valueOf(stored.substring(7,8)));
+        System.out.println(x1 + y1 + x + y);
+        allMoves.add(x1+y1+x+y);
+    }
+    public double handleMove(int x, int y,double val){
+        enemy.updateLegals();
+        player.updateLegals();
+        int updater = 0;
+        String[][] storedBoard = new String[8][8];
+        String saver = board.getBoard()[y][x];
+        
+        for(int i =0; i < enemy.movesX.size();i++){
+            if(enemy.movesX.get(i)==x&&enemy.movesY.get(i)==y){
+                updater--;
+            }
+        }
+        if(player.getPlayerTurn()){
+            board.getBoard()[y][x] = "bP000";
+        }
+        else{
+            board.getBoard()[y][x] = "wP000";
+        }
+        
+        for(int i =0; i < player.movesX.size();i++){
+            if(player.movesX.get(i)==x&&player.movesY.get(i)==y){
+                updater++;
+            }
+        }
+        board.getBoard()[y][x]=saver;
+        player.deleteMoves();
+        enemy.deleteMoves();
+        if(updater<0){
+            return val;
+        }
+        return 0;
+    }
+    public double evalBoard(boolean isWhite){
+        double whiteTotal = 0;
+        double blackTotal =0;
+        for(int i =0;i<8;i++){
+            for(int j =0;j<8;j++){
+                if(board.getBoard()[i][j].startsWith("wP")){
+                    double jconstant = 0; 
+                    if(j>=4){jconstant=7;}
+                    whiteTotal+=1+0.1*(7-i) + (0.1*Math.abs(jconstant-j))- handleMove(j,i, (1+0.1*(7-i) + (0.1*Math.abs(jconstant-j))));
+                }
+                if(board.getBoard()[i][j].startsWith("wR")){
+                    
+                    whiteTotal+=5-handleMove(j,i,5);
+                }
+                if(board.getBoard()[i][j].startsWith("wB")){
+                    
+                    whiteTotal+=3.3-handleMove(j,i,3.3);
+                }
+                if(board.getBoard()[i][j].startsWith("wH")){
+                    
+                    whiteTotal+=2.7-handleMove(j,i,2.7);
+                }
+                if(board.getBoard()[i][j].startsWith("wK")){
+                    whiteTotal+=100-handleMove(j,i,100);
+                }
+                if(board.getBoard()[i][j].startsWith("wQ")){
+                   
+                    whiteTotal+=9-handleMove(j,i,9);
+                }
+                if(board.getBoard()[i][j].startsWith("bP")){
+                   int jconstant = 0; 
+                    if(j>=4){jconstant=7;}
+                    blackTotal+=1+(0.1*i) + (0.1*Math.abs(jconstant-j))- handleMove(j,i, (1+0.1*(7-i) + (0.1*Math.abs(jconstant-j))));
+                    System.out.println(0.1*Math.abs(jconstant-j));
+                }
+                if(board.getBoard()[i][j].startsWith("bR")){
+                    
+                    blackTotal+=5-handleMove(j,i,5);
+                }
+                if(board.getBoard()[i][j].startsWith("bB")){
+                    
+                    blackTotal+=3.3-handleMove(j,i,3.3);
+                }
+                if(board.getBoard()[i][j].startsWith("bH")){
+                    
+                    blackTotal+=2.7-handleMove(j,i,2.7);
+                }
+                if(board.getBoard()[i][j].startsWith("bK")){
+                    blackTotal+=100-handleMove(j,i,100);
+                }
+                if(board.getBoard()[i][j].startsWith("bQ")){
+                   
+                    blackTotal+=9-handleMove(j,i,9);
+                }
+            }
+        }
+        if(isWhite){
+            return whiteTotal-blackTotal;
+        }return blackTotal-whiteTotal;
+    }
+    public void smartMove(){
+        if(player.getPlayerTurn()==board.getTurn()){
+        if(state==0){
+           openingMove(); 
+        }
+        else if(state==1){
+            if(player.getPlayerTurn() == board.getTurn()){
+                ArrayList<Double> evals = new ArrayList<>();
+                ArrayList<Integer> moveX = new ArrayList<>();
+                ArrayList<Integer> moveY = new ArrayList<>();
+                ArrayList<Integer> storedIndex = new ArrayList<>();
+                ArrayList<String> pieceTag = new ArrayList<>();       
+                int movecount = 0; 
+                String maxTag  = "";
+                String[][] storedBoard = new String[8][8]; 
+                for(int j =0; j < board.getBoard().length;j++){
+                        for(int k =0; k  < board.getBoard()[j].length;k++){
+                            storedBoard[j][k] = board.getBoard()[j][k];
+                        }
+                }
+                for(int i =0; i < 8;i++){
+                    player.pawns[i].deleteMoves();
+                    player.pawns[i].checkLegalMove();
+                    int storedX = player.pawns[i].getX();
+                    int storedY = player.pawns[i].getY();
+                    System.out.println("stored x and stored y" + " x: " + storedX + " Y: " + storedY);
+                    ArrayList<Integer> cloneX = new ArrayList<>();
+                    ArrayList<Integer> cloneY = new ArrayList<>();
+                    int movecounts = player.pawns[i].getMoveCount();
+                    for(int j =0; j < player.pawns[i].getMovesX().size();j++){
+                        cloneX.add(player.pawns[i].getMovesX().get(j));
+                        cloneY.add(player.pawns[i].getMovesY().get(j));
+                    }
+
+                    for(int j =0; j < cloneY.size();j++){
+                        player.pawns[i].deleteMoves();
+                        player.pawns[i].checkLegalMove();
+
+                        player.pawns[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
+                        player.deleteMoves();
+                        enemy.deleteMoves();
+                        if(!board.isInCheck()){
+                            evals.add(evalBoard(player.getPlayerTurn()));
+                            moveX.add(cloneX.get(j));
+                            moveY.add(cloneY.get(j));
+                            storedIndex.add(i);
+                            pieceTag.add(player.pawns[i].getTag());
+                        }
+                        player.pawns[i].moveChanges(storedX,storedY);
+                        player.pawns[i].editMoveCount(movecounts);
+                        board.updateBoard(storedBoard);
+                        movecount++;
+
+                    }
+
+                }
+                for(int i =0; i < 2;i++){
+                    player.bishops[i].deleteMoves();
+                    player.bishops[i].checkLegalMove();
+                    int storedX = player.bishops[i].getX();
+                    int storedY = player.bishops[i].getY();
+                    System.out.println("stored x and stored y" + " x: " + storedX + " Y: " + storedY);
+                    ArrayList<Integer> cloneX = new ArrayList<>();
+                    ArrayList<Integer> cloneY = new ArrayList<>();
+                    int movecounts = player.bishops[i].getMoveCount();
+                    for(int j =0; j < player.bishops[i].getMovesX().size();j++){
+                        cloneX.add(player.bishops[i].getMovesX().get(j));
+                        cloneY.add(player.bishops[i].getMovesY().get(j));
+                    }
+
+                    for(int j =0; j < cloneY.size();j++){
+                        player.bishops[i].deleteMoves();
+                        player.bishops[i].checkLegalMove();
+
+                        player.bishops[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
+                        player.deleteMoves();
+                        enemy.deleteMoves();
+                        if(!board.isInCheck()){
+                            evals.add(evalBoard(player.getPlayerTurn()));
+                            moveX.add(cloneX.get(j));
+                            moveY.add(cloneY.get(j));
+                            storedIndex.add(i);
+                            pieceTag.add(player.bishops[i].getTag());
+                        }
+                        player.bishops[i].moveChanges(storedX,storedY);
+                        player.bishops[i].editMoveCount(movecounts);
+                        board.updateBoard(storedBoard);
+                        movecount++;
+
+                    }
+
+                }
+                for(int i =0; i < 2;i++){
+                    player.rooks[i].deleteMoves();
+                    player.rooks[i].checkLegalMove();
+                    int storedX = player.rooks[i].getX();
+                    int storedY = player.rooks[i].getY();
+                    System.out.println("stored x and stored y" + " x: " + storedX + " Y: " + storedY);
+                    ArrayList<Integer> cloneX = new ArrayList<>();
+                    ArrayList<Integer> cloneY = new ArrayList<>();
+                    int movecounts = player.rooks[i].getMoveCount();
+                    for(int j =0; j < player.rooks[i].getMovesX().size();j++){
+                        cloneX.add(player.rooks[i].getMovesX().get(j));
+                        cloneY.add(player.rooks[i].getMovesY().get(j));
+                    }
+
+                    for(int j =0; j < cloneY.size();j++){
+                        player.rooks[i].deleteMoves();
+                        player.rooks[i].checkLegalMove();
+
+                        player.rooks[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
+                       player.deleteMoves();
+                        enemy.deleteMoves();
+                        if(!board.isInCheck()){
+                            evals.add(evalBoard(player.getPlayerTurn()));
+                            moveX.add(cloneX.get(j));
+                            moveY.add(cloneY.get(j));
+                            storedIndex.add(i);
+                            pieceTag.add(player.rooks[i].getTag());
+                        }
+                         player.rooks[i].moveChanges(storedX,storedY);
+                        player.rooks[i].editMoveCount(movecounts);
+                        board.updateBoard(storedBoard);
+                        movecount++;
+
+                    }
+
+                }
+                for(int i =0; i < 2;i++){
+                    player.knights[i].deleteMoves();
+                    player.knights[i].checkLegalMove();
+                    int storedX = player.knights[i].getX();
+                    int storedY = player.knights[i].getY();
+                    System.out.println("stored x and stored y" + " x: " + storedX + " Y: " + storedY);
+                    ArrayList<Integer> cloneX = new ArrayList<>();
+                    ArrayList<Integer> cloneY = new ArrayList<>();
+                    int movecounts = player.knights[i].getMoveCount();
+                    for(int j =0; j < player.knights[i].getMovesX().size();j++){
+                        cloneX.add(player.knights[i].getMovesX().get(j));
+                        cloneY.add(player.knights[i].getMovesY().get(j));
+                    }
+
+                    for(int j =0; j < cloneY.size();j++){
+                        player.knights[i].deleteMoves();
+                        player.knights[i].checkLegalMove();
+
+                        player.knights[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
+                        player.deleteMoves();
+                        enemy.deleteMoves();
+                        if(!board.isInCheck()){
+                            evals.add(evalBoard(player.getPlayerTurn()));
+                            moveX.add(cloneX.get(j));
+                            moveY.add(cloneY.get(j));
+                            storedIndex.add(i);
+                            pieceTag.add(player.knights[i].getTag());
+                        }
+                        player.knights[i].moveChanges(storedX,storedY);
+                        player.knights[i].editMoveCount(movecounts);
+                        board.updateBoard(storedBoard);
+                        movecount++;
+
+                    }
+
+                }
+                for(int i =0; i < 1;i++){
+                    player.queen.deleteMoves();
+                    player.queen.checkLegalMove();
+                    int storedX = player.queen.getX();
+                    int storedY = player.queen.getY();
+                    System.out.println("stored x and stored y" + " x: " + storedX + " Y: " + storedY);
+                    ArrayList<Integer> cloneX = new ArrayList<>();
+                    ArrayList<Integer> cloneY = new ArrayList<>();
+                    int movecounts = player.queen.getMoveCount();
+                    for(int j =0; j < player.queen.getMovesX().size();j++){
+                        cloneX.add(player.queen.getMovesX().get(j));
+                        cloneY.add(player.queen.getMovesY().get(j));
+                    }
+
+                    for(int j =0; j < cloneY.size();j++){
+                        player.queen.deleteMoves();
+                        player.queen.checkLegalMove();
+
+                        player.queen.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
+                        player.deleteMoves();
+                        enemy.deleteMoves();
+                        board.displayBoard();
+                        if(!board.isInCheck()){
+                        
+                            evals.add(evalBoard(player.getPlayerTurn()));
+                            moveX.add(cloneX.get(j));
+                            moveY.add(cloneY.get(j));
+                            storedIndex.add(i);
+                            pieceTag.add(player.queen.getTag());
+                        }
+                        player.queen.moveChanges(storedX,storedY);
+                        player.queen.editMoveCount(movecounts);
+                        
+                        board.updateBoard(storedBoard);
+                        movecount++;
+
+                    }
+
+                }
+                for(int i =0; i < 1;i++){
+                    player.king.deleteMoves();
+                    player.king.checkLegalMove();
+                    int storedX = player.king.getX();
+                    int storedY = player.king.getY();
+                    System.out.println("stored x and stored y" + " x: " + storedX + " Y: " + storedY);
+                    ArrayList<Integer> cloneX = new ArrayList<>();
+                    ArrayList<Integer> cloneY = new ArrayList<>();
+                    int movecounts = player.king.getMoveCount();
+                    for(int j =0; j < player.king.getMovesX().size();j++){
+                        cloneX.add(player.king.getMovesX().get(j));
+                        cloneY.add(player.king.getMovesY().get(j));
+                    }
+
+                    for(int j =0; j < cloneY.size();j++){
+                        player.king.deleteMoves();
+                        player.king.checkLegalMove();
+
+                        player.king.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
+                        player.deleteMoves();
+                        enemy.deleteMoves();
+                        if(!board.isInCheck()){      
+                            evals.add(evalBoard(player.getPlayerTurn()));
+                            moveX.add(cloneX.get(j));
+                            moveY.add(cloneY.get(j));
+                            storedIndex.add(i);
+                            pieceTag.add(player.king.getTag());
+                        }
+                        player.king.moveChanges(storedX,storedY);
+                        player.king.editMoveCount(movecounts);
+                        board.updateBoard(storedBoard);
+                        movecount++;
+
+                    }
+
+                }
+                double maxEval = 0;
+                int storedLocs =0;
+                for(int j =0; j < evals.size();j++){
+                    System.out.println(evals.get(j));
+                    if(evals.get(j)-maxEval>0){
+                        storedLocs = j;
+                        maxEval = evals.get(j);
+                        System.out.println(evals.get(j));
+                        System.out.println(storedIndex.get(j));
+                        System.out.println(pieceTag.get(j));
+                    }
+                }
+                if(player.getPlayerTurn()==board.getTurn()&&storedIndex.size()>0){
+                    int storedIndexs = storedIndex.get(storedLocs);
+                    System.out.println(storedLocs);
+                    System.out.println(player.pawns[storedIndex.get(storedLocs)].getX() +  " Player " + player.pawns[storedIndex.get(storedLocs)].getY());
+                    char switchable = pieceTag.get(storedLocs).charAt(1);
+                    switch(switchable){
+                        case 'P':
+                            player.pawns[storedIndex.get(storedLocs)].checkLegalMove();
+                            if(player.pawns[storedIndex.get(storedLocs)].checkPossibleMoves(moveX.get(storedLocs),moveY.get(storedLocs))==1){
+                                System.out.println(player.pawns[storedIndex.get(storedLocs)].getX() +  " Player " + player.pawns[storedIndex.get(storedLocs)].getY());
+                            }
+                            break;
+                        case 'B':
+                            player.bishops[storedIndex.get(storedLocs)].checkLegalMove();
+                            if(player.bishops[storedIndex.get(storedLocs)].checkPossibleMoves(moveX.get(storedLocs),moveY.get(storedLocs))==1){
+                                System.out.println(player.pawns[storedIndex.get(storedLocs)].getX() +  " Player " + player.pawns[storedIndex.get(storedLocs)].getY());
+                            }
+                            break;
+                        case 'H':
+                            player.knights[storedIndex.get(storedLocs)].checkLegalMove();
+                            if(player.knights[storedIndex.get(storedLocs)].checkPossibleMoves(moveX.get(storedLocs),moveY.get(storedLocs))==1){
+                                System.out.println(player.pawns[storedIndex.get(storedLocs)].getX() +  " Player " + player.pawns[storedIndex.get(storedLocs)].getY());
+                            }
+                            break;
+                        case 'R':
+                            player.rooks[storedIndex.get(storedLocs)].checkLegalMove();
+                            if(player.rooks[storedIndex.get(storedLocs)].checkPossibleMoves(moveX.get(storedLocs),moveY.get(storedLocs))==1){
+                                System.out.println(player.pawns[storedIndex.get(storedLocs)].getX() +  " Player " + player.pawns[storedIndex.get(storedLocs)].getY());
+                            }
+                            break;
+                        case 'Q':
+                            player.queen.checkLegalMove();
+                            if(player.queen.checkPossibleMoves(moveX.get(storedLocs),moveY.get(storedLocs))==1){
+                                System.out.println(player.pawns[storedIndex.get(storedLocs)].getX() +  " Player " + player.pawns[storedIndex.get(storedLocs)].getY());
+                            }
+                            break;
+                        case 'K':
+                            player.king.checkLegalMove();
+                            if(player.king.checkPossibleMoves(moveX.get(storedLocs),moveY.get(storedLocs))==1){
+                                System.out.println(player.pawns[storedIndex.get(storedLocs)].getX() +  " Player " + player.pawns[storedIndex.get(storedLocs)].getY());
+                            }
+                            break;
+
+                    }
+
+                    System.out.println(moveX.get(storedLocs) + " " + moveY.get(storedLocs));
+
+                    board.switchTurn();
+                    board.displayBoard();
+                    System.out.println("movecount" + movecount);
+                    System.out.println("player pawn x " + player.pawns[storedIndexs].getX() + player.pawns[storedIndexs].getY());
+                }
+            }
+        }
+        }
+    }
+            
+}
