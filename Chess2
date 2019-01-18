@@ -1,6 +1,5 @@
-
 /**
-Chess Interface Version 0.812
+Chess Interface Version 2.12
 *What we have done so far 
     *All rules are working including basic moves, check, checkmate, en passant and castling
     *We have not included threefold repetition because it requires excessive computational power and will significantly slow down program
@@ -12,9 +11,11 @@ Chess Interface Version 0.812
 */
 /**
  * Tentative Schedule for before the break 
-    *By December First: bugs have been fixed now, comment everything 
-    * By December Third: Have a finished U.I with home page, directions, settings, music, and other effects 
-    * By the Break: start exploring nodes and add file paths to store board positions potentially 
+    *Make so opening can play more than 2 moves 
+    * Make so end game isn't scuffed
+    * Add another layer of move making 
+    * Improve to alpha beta pruning algo 
+    * Make second and third layers 
  */
 /**
  * Bugs to fix EVERY TIME A BUG OCCURS ADD IT TO THE LIST AND UPDATE DRIVE WITH THE NEW LIST
@@ -41,7 +42,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMotionListener{
+public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMotionListener, KeyListener{
     Images whiteRook = new Images("whiterook.png");//creates new Images, all of whitch are displayed in gameUpdate
     Images whiteKnight = new Images("whiteknight.png");
     Images whiteBishop = new Images("whitebishop.png");
@@ -107,11 +108,15 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     String checkmessage="";//used  to display the state of the game 
     int displayBoard = 0; 
     boolean handle = true;//determines whether or not there has been a checkmate 
+    AI ai;
+    Player white;
+    Player black;
+    boolean updateState = true;
     public Chess2(){    
         super("Chess Game");//tittle is chess game
         addMouseListener(this);//the mouselisteners, listens for any mouse events 
         addMouseMotionListener(this);
-        
+        addKeyListener(this);
         for(int i =0; i< 8; i++){//sets up the pawns 
            pawnsWhite[i] = new Pawn(board,i,6,Integer.parseInt(boards[6][i].substring(2,4)),'w');//creates the white pawns, see details on constructor in Piece.setup()
            pawnsBlack[i] = new Pawn(board,i,1,Integer.parseInt(boards[1][i].substring(2,4)),'b');//creates black pawns
@@ -134,8 +139,14 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
         g2d= backbuffer.createGraphics();//more graphics setup 
         gameloop = new Thread(this);//starts the game thread 
         gameloop.start();
-        
+        white = new Player(board,pawnsWhite, rooksWhite, knightsWhite, bishopsWhite, queenWhite,kingWhite,true);
+        black = new Player(board,pawnsBlack, rooksBlack, knightsBlack, bishopsBlack, queenBlack,kingBlack,false);
+        board.setBlack(black);
+        board.setWhite(white);
+        ai = new AI(black,board,white);
+        board.setReady(true);
     }
+    
     public void run(){//the while running loop goes here 
          Thread current = Thread.currentThread();
         while(current==gameloop){
@@ -148,7 +159,11 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
             if(displayBoard>13){//delays the load in order to avoid buffering of the Images as they load to the screen, it takes 12 loops for buffering to stop
                 setVisible(true);
             }
+            if(updateState){
+                setBoard(board.getBoard());
+            }
             gameUpdate();//draws the Board graphics
+        
         }
     }
     /**
@@ -317,6 +332,15 @@ Open the settings page
         g2d.drawImage(backbuffer,0,0,this);
         
     }
+    public void keyTyped(KeyEvent e) {}
+    public void keyPressed(KeyEvent e) {}  
+    public void keyReleased(KeyEvent e) {
+        
+        
+        board.isInCheck();
+        
+       ai.smartMove();
+    }
     public void mouseDragged(MouseEvent e ){}
     public void mouseMoved(MouseEvent e){}
      public void mouseClicked(MouseEvent e){}//added so that there is no exception
@@ -331,6 +355,7 @@ Open the settings page
      */
     public void mousePressed(MouseEvent e){//Where the event handeling begins, here the program checks if a piece has been selected, and if it has store information about it 
         board.updateBoard(boards);
+        updateState = false;
         int mouseX = e.getX();//gets the x and y values of the mouse 
         int mouseY = e.getY();
         for(int i =whiteMovesX.size()-1; i >-1;i--){//resets the whiteMovesX list to account for a potential move change 
@@ -425,14 +450,14 @@ Open the settings page
                 if(mouseX>100+j*75&&mouseX<100+75+j*75&&mouseY>100+i*75&&mouseY<100+(i*75)+75&&gamestate ==2){//checks if the mouse was presed on the Board  
                     type = "";//resets type 
                     for(int k=0; k<8;k++){//used to check if it is one of the pawns 
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==pawnsWhite[k].getID()&&turn){//if the id matches a pawnID and it is whites turn
+                        if(Integer.parseInt(boards[i][j].substring(2,4))==pawnsWhite[k].getID()&&board.getTurn()){//if the id matches a pawnID and it is whites turn
                             saveK =k;//save the pawn that was selected so that we can check if the move made to it was legal when the mouse is released
                             pawnsWhite[k].deleteMoves();//delete any previous moves so that there is no overlapping of moves, see piece.deleteMove() for details
                             pawnsWhite[k].checkLegalMove();//stores all of the legal moves in an array list
                             type="wP";//since a pawn can be upgraded to a different piece we need to use its tag to save the type
                             //when the mouse is released, it will check if based on the tag, a legal move was made
                         }
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==pawnsBlack[k].getID()&&!turn){//same thing but for black pawn
+                        if(Integer.parseInt(boards[i][j].substring(2,4))==pawnsBlack[k].getID()&&!board.getTurn()){//same thing but for black pawn
                             saveK =k;
                             pawnsBlack[k].deleteMoves();
                             pawnsBlack[k].checkLegalMove();
@@ -440,62 +465,62 @@ Open the settings page
                         }
                     }
                     for(int k =0; k < 2;k++){//same as above but for other pieces 
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==rooksWhite[k].getID()&&turn){
+                        if(Integer.parseInt(boards[i][j].substring(2,4))==rooksWhite[k].getID()&&board.getTurn()){
                             saveK = k;
                             rooksWhite[k].deleteMoves();
                             rooksWhite[k].checkLegalMove();
                             
                            type = "wR";
                         }
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==rooksBlack[k].getID()&&!turn){
+                        if(Integer.parseInt(boards[i][j].substring(2,4))==rooksBlack[k].getID()&&!board.getTurn()){
                             saveK = k;
                             rooksBlack[k].deleteMoves();
                             rooksBlack[k].checkLegalMove();
                             type = "bR";
                         }
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==knightsWhite[k].getID()&&turn){
+                        if(Integer.parseInt(boards[i][j].substring(2,4))==knightsWhite[k].getID()&&board.getTurn()){
                             saveK = k;
                             knightsWhite[k].deleteMoves();
                             knightsWhite[k].checkLegalMove();
                             type = "wH";
                         }
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==knightsBlack[k].getID()&&!turn){
+                        if(Integer.parseInt(boards[i][j].substring(2,4))==knightsBlack[k].getID()&&!board.getTurn()){
                             saveK = k;
                             knightsBlack[k].deleteMoves();
                             knightsBlack[k].checkLegalMove();
                             type = "bH";
                         }
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==bishopsWhite[k].getID()&&turn){
+                        if(Integer.parseInt(boards[i][j].substring(2,4))==bishopsWhite[k].getID()&&board.getTurn()){
                             saveK = k;
                             bishopsWhite[k].deleteMoves();
                             bishopsWhite[k].checkLegalMove();
                             type = "wB";
                         }
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==bishopsBlack[k].getID()&&!turn){
+                        if(Integer.parseInt(boards[i][j].substring(2,4))==bishopsBlack[k].getID()&&!board.getTurn()){
                             saveK = k;
                             bishopsBlack[k].deleteMoves();
                             bishopsBlack[k].checkLegalMove();
                             type = "bB";
                         }
                     }
-                    if(Integer.parseInt(boards[i][j].substring(2,4))==queenWhite.getID()&&turn){
+                    if(Integer.parseInt(boards[i][j].substring(2,4))==queenWhite.getID()&&board.getTurn()){
                             queenWhite.deleteMoves();
                             queenWhite.checkLegalMove();
                             type = "wQ";
                     }
-                    if(Integer.parseInt(boards[i][j].substring(2,4))==queenBlack.getID()&&!turn){
+                    if(Integer.parseInt(boards[i][j].substring(2,4))==queenBlack.getID()&&!board.getTurn()){
                            
                             queenBlack.deleteMoves();
                             queenBlack.checkLegalMove();
                             type = "bQ";
                     }
-                    if(Integer.parseInt(boards[i][j].substring(2,4))==kingWhite.getID()&&turn){
+                    if(Integer.parseInt(boards[i][j].substring(2,4))==kingWhite.getID()&&board.getTurn()){
                            
                             kingWhite.deleteMoves();
                             kingWhite.checkLegalMove();
                             type = "wK";
                     }
-                    if(Integer.parseInt(boards[i][j].substring(2,4))==kingBlack.getID()&&!turn){
+                    if(Integer.parseInt(boards[i][j].substring(2,4))==kingBlack.getID()&&!board.getTurn()){
                             kingBlack.deleteMoves();
                             kingBlack.checkLegalMove();
                             type = "bK";
@@ -512,7 +537,7 @@ Open the settings page
      * @param e  used to get the x and the y of the mouse 
      */
     public void mouseReleased(MouseEvent e){//here checks if a piece has been selected ,and if so, based on the x and y of the mouse if the move made to it is leaal
-        
+      
         int mouseX = e.getX();//stores the x and y of the mouse 
         int mouseY = e.getY();
         for(int i =0; i < 8;i++){//same loop as above, if the mouse was pressed on the Board, get the coordinates of the Board through x and y 
@@ -597,7 +622,7 @@ Open the settings page
             piece.moveChanges(piece2.getX()-x,piece2.getY());
             boards[piece.getY()][piece.getX()]=piece.getTag();            
             board.updateBoard(boards);
-            turn = !turn;
+            board.switchTurn();
                
     }/**
      * Here any potential moves gathered from the mouseInputs are tested
@@ -646,11 +671,12 @@ Open the settings page
                     System.out.println("working here");
                     piece.displayMoves();
                 }
+                
                 //piece.deleteMoves();
                 if(!isInCheck(piece.getTag().charAt(0),true)){//if it is not in check 
-                    
+                    ai.addMove();
                     setBoard(board.getBoard());//then update the display Board accordingly 
-
+                    board.switchTurn();
                 }else{
                     //board.displayBoard();
                     
@@ -660,7 +686,7 @@ Open the settings page
                     break;//ends before the turn is switched so the person has a chace to get it right
                     
                 }
-                turn = !turn;
+                
                 break;
         
             case 2://will update this later when i have time 
@@ -668,7 +694,8 @@ Open the settings page
                 System.out.println("special considered");
                 if(!isInCheck(piece.getTag().charAt(0),true)){
                     setBoard(board.getBoard());
-                    
+                    board.switchTurn();
+                    ai.addMove();
                 }
                 else{
                     board.updateBoard(boards);
@@ -692,6 +719,8 @@ Open the settings page
                     boards[7][4] = "00000";
                     System.out.println("KingWhite x and y " + kingWhite.getX() + " " +  kingWhite.getY());
                     board.updateBoard(boards);
+                board.switchTurn();
+                ai.addMove();
                 }    
                 else{
                     board.updateBoard(boards);
@@ -709,6 +738,8 @@ Open the settings page
                     boards[0][4] = "00000";
                     System.out.println("KingBlack x and y " + kingBlack.getX() + " " +  kingWhite.getY());
                     board.updateBoard(boards);
+                    board.switchTurn();
+                    ai.addMove();
                 }
                 else{
                     board.updateBoard(boards);
@@ -727,12 +758,15 @@ Open the settings page
                     boards[7][4] = "00000";
                     System.out.println("KingWhite x and y " + kingWhite.getX() + " " +  kingWhite.getY());
                     board.updateBoard(boards);
+                    board.switchTurn();
+                    ai.addMove();
                 }
                 else{
                     board.updateBoard(boards);
                     
                     piece.moveChanges(4,7);
                     piece.movecount = 0;
+                    board.switchTurn();
                 }
                 
                 break;
@@ -745,6 +779,8 @@ Open the settings page
                     boards[0][4] = "00000";
                     System.out.println("KingWhite x and y " + kingWhite.getX() + " " +  kingWhite.getY());
                     board.updateBoard(boards);
+                    board.switchTurn();
+                    ai.addMove();
                 }
                 else{
                     board.updateBoard(boards);
@@ -782,7 +818,7 @@ Open the settings page
         }else if(isInCheck('w',true)){checkmessage = "is in checkwhite";}
         else if(isInCheck('b',true)){checkmessage = "is in checkblack";}
         else{checkmessage = "is not in check";}
-            
+        updateState = true;
     }
     /**
      * This is for castling and checks if black has a legal move in any of the squares that king and rook will cross through/inhibit
