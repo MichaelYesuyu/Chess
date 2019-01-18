@@ -21,10 +21,13 @@ public class Player {
     Queen queen;
     ArrayList<Integer> movesX = new ArrayList<>();
     ArrayList<Integer> movesY = new ArrayList<>();
+    boolean playerTurn;
+    boolean ai;
+    
     public Player(){
         
     }
-    public Player(Board board, Pawn[] pawns, Rook[] rooks, Bishop[] bishops, Knight[] knights,King king, Queen queen) {
+    public Player(Board board, Pawn[] pawns, Rook[] rooks,Knight[] knights,Bishop[] bishops,Queen queen, King king,boolean playerTurn) {
         this.board = board;
         this.pawns = pawns;
         this.rooks = rooks;
@@ -32,10 +35,19 @@ public class Player {
         this.knights = knights;
         this.king = king;
         this.queen = queen;
+        this.playerTurn = playerTurn;
     }
+    public boolean getPlayerTurn(){
+        return playerTurn;
+    }
+    public void setAI(){
+        
+    }
+    
     public void setAlives(){
         for(int i =0; i  <8; i++){
             pawns[i].controlledOff = true;
+            
         }
         for(int i =0; i < 2; i++){
             rooks[i].controlledOff = true;
@@ -48,14 +60,38 @@ public class Player {
     public void updateLegals(){
         for(int i =0; i < 8; i++){
             pawns[i].checkLegalMove();
+            for(int j =0; j< pawns[i].possiblemovesX.size();j++){
+               movesX.add(pawns[i].getMovesX().get(j));
+               movesY.add(pawns[i].getMovesY().get(j));
+            }
         }
         for(int i =0;i < 2; i++){
             knights[i].checkLegalMove();
             bishops[i].checkLegalMove();
             rooks[i].checkLegalMove();
+            for(int j =0; j< rooks[i].possiblemovesX.size();j++){
+               movesX.add(rooks[i].getMovesX().get(j));
+               movesY.add(rooks[i].getMovesY().get(j));
+            }
+            for(int j =0; j< knights[i].possiblemovesX.size();j++){
+               movesX.add(knights[i].getMovesX().get(j));
+               movesY.add(knights[i].getMovesY().get(j));
+            }
+            for(int j =0; j<bishops[i].possiblemovesX.size();j++){
+               movesX.add(bishops[i].getMovesX().get(j));
+               movesY.add(bishops[i].getMovesY().get(j));
+            }
         }
         queen.checkLegalMove();
+        for(int j =0; j< queen.possiblemovesX.size();j++){
+               movesX.add(queen.getMovesX().get(j));
+               movesY.add(queen.getMovesY().get(j));
+            }
         king.checkLegalMove();
+        for(int j =0; j<king.possiblemovesX.size();j++){
+               movesX.add(king.getMovesX().get(j));
+               movesY.add(king.getMovesY().get(j));
+        }
     }
     public void deleteMoves(){
         for(int i =0; i < 8; i++){
@@ -68,7 +104,10 @@ public class Player {
         }
         queen.deleteMoves();
         king.deleteMoves();
-    
+        for(int i =0; i < movesX.size();i++){
+            movesX.remove(i);
+            movesY.remove(i);
+        }
     }
     public void checkMoves(){
         deleteMoves();
