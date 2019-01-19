@@ -92,9 +92,7 @@ public class AI{
                    
                }
                
-               if(line.substring(startingIndex,startingIndex+5).equals("e2e4")){
-                   System.out.println("recognizing");
-               }
+               
                 
                 if (handlingLine&&startingIndex+compareMoveLine.length()<line.length()&&line.substring(startingIndex,startingIndex + compareMoveLine.length()).equals(compareMoveLine)){//if the current line contains the current moveLine 
                     //what to do if Opening matches up with an Opening in the repretoire
@@ -334,12 +332,19 @@ public class AI{
     public double evalBoard(boolean isWhite){
         double whiteTotal = 0;
         double blackTotal =0;
+        
         for(int i =0;i<8;i++){
             for(int j =0;j<8;j++){
+                
                 if(board.getBoard()[i][j].startsWith("wP")){
-                    double jconstant = 0; 
-                    if(j>=4){jconstant=7;}
-                    whiteTotal+=1+0.1*(7-i) + (0.1*Math.abs(jconstant-j))- handleMove(j,i, (1+0.1*(7-i) + (0.1*Math.abs(jconstant-j))));
+                    double jconstant = 0+j; 
+                    if(j >=3){jconstant=7-j;}
+                    if(i==4){
+                        System.out.println("hey we are looking at this " + " piece tag " + board.getBoard()[i][j] + " " +(1+(0.1*(7-i)) + (0.2*(jconstant + (7-i)))- handleMove(j,i, (1+0.1*(7-i)))));
+                    }
+                    
+                    whiteTotal+=1+(0.1*(7-i)) + (0.2*(jconstant + (7-i)))- handleMove(j,i, (1+0.1*(7-i)));
+                    
                 }
                 if(board.getBoard()[i][j].startsWith("wR")){
                     
@@ -361,10 +366,10 @@ public class AI{
                     whiteTotal+=9-handleMove(j,i,9);
                 }
                 if(board.getBoard()[i][j].startsWith("bP")){
-                   int jconstant = 0; 
-                    if(j>=4){jconstant=7;}
-                    blackTotal+=1+(0.1*i) + (0.1*Math.abs(jconstant-j))- handleMove(j,i, (1+0.1*(7-i) + (0.1*Math.abs(jconstant-j))));
-                    System.out.println(0.1*Math.abs(jconstant-j));
+                   int jconstant = 0+j; 
+                   if(j >=3){jconstant=7-j;}
+                    blackTotal+=1+(0.1*i) +(0.05*(jconstant+i))- handleMove(j,i, (1+(0.1*i)));
+                    
                 }
                 if(board.getBoard()[i][j].startsWith("bR")){
                     
@@ -389,7 +394,9 @@ public class AI{
         }
         if(isWhite){
             return whiteTotal-blackTotal;
-        }return blackTotal-whiteTotal;
+        }
+        
+        return blackTotal-whiteTotal;
     }
     public void smartMove(){
         if(player.getPlayerTurn()==board.getTurn()){
@@ -420,16 +427,20 @@ public class AI{
                     ArrayList<Integer> cloneX = new ArrayList<>();
                     ArrayList<Integer> cloneY = new ArrayList<>();
                     int movecounts = player.pawns[i].getMoveCount();
+                    System.out.println("movecount " + movecounts);
                     for(int j =0; j < player.pawns[i].getMovesX().size();j++){
                         cloneX.add(player.pawns[i].getMovesX().get(j));
                         cloneY.add(player.pawns[i].getMovesY().get(j));
                     }
-
+                    if(cloneY.size()>1){
+                        System.out.println("so we are considering mulitple");
+                    }
                     for(int j =0; j < cloneY.size();j++){
-                        player.pawns[i].deleteMoves();
+                        System.out.println(player.pawns[i].getTag()+ " " + cloneX.get(j) + "  "+ cloneY.get(j));
                         player.pawns[i].checkLegalMove();
-
-                        player.pawns[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
+                        if(player.pawns[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j))!=3){
+                            System.out.println("cloned " + player.pawns[i].getTag()+ " " + cloneX.get(j) + "  "+ cloneY.get(j));
+                        }
                         player.deleteMoves();
                         enemy.deleteMoves();
                         if(!board.isInCheck()){
@@ -441,9 +452,10 @@ public class AI{
                         }
                         player.pawns[i].moveChanges(storedX,storedY);
                         player.pawns[i].editMoveCount(movecounts);
+                        System.out.println(player.pawns[i].getMoveCount());
                         board.updateBoard(storedBoard);
                         movecount++;
-
+                            
                     }
 
                 }
@@ -462,9 +474,7 @@ public class AI{
                     }
 
                     for(int j =0; j < cloneY.size();j++){
-                        player.bishops[i].deleteMoves();
-                        player.bishops[i].checkLegalMove();
-
+                        player.bishops[i].checkLegalMove();    
                         player.bishops[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         player.deleteMoves();
                         enemy.deleteMoves();
@@ -484,6 +494,7 @@ public class AI{
 
                 }
                 for(int i =0; i < 2;i++){
+                    player.pawns[i].checkLegalMove();
                     player.rooks[i].deleteMoves();
                     player.rooks[i].checkLegalMove();
                     int storedX = player.rooks[i].getX();
@@ -498,9 +509,8 @@ public class AI{
                     }
 
                     for(int j =0; j < cloneY.size();j++){
-                        player.rooks[i].deleteMoves();
-                        player.rooks[i].checkLegalMove();
-
+                        
+                        player.rooks[i].checkLegalMove();    
                         player.rooks[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                        player.deleteMoves();
                         enemy.deleteMoves();
@@ -534,9 +544,8 @@ public class AI{
                     }
 
                     for(int j =0; j < cloneY.size();j++){
-                        player.knights[i].deleteMoves();
+                        
                         player.knights[i].checkLegalMove();
-
                         player.knights[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         player.deleteMoves();
                         enemy.deleteMoves();
@@ -570,13 +579,10 @@ public class AI{
                     }
 
                     for(int j =0; j < cloneY.size();j++){
-                        player.queen.deleteMoves();
+                        
                         player.queen.checkLegalMove();
-
                         player.queen.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
-                        player.deleteMoves();
-                        enemy.deleteMoves();
-                        board.displayBoard();
+                        
                         if(!board.isInCheck()){
                         
                             evals.add(evalBoard(player.getPlayerTurn()));
@@ -609,9 +615,9 @@ public class AI{
                     }
 
                     for(int j =0; j < cloneY.size();j++){
-                        player.king.deleteMoves();
+                        //player.king.deleteMoves();
+                        //player.king.checkLegalMove();
                         player.king.checkLegalMove();
-
                         player.king.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         player.deleteMoves();
                         enemy.deleteMoves();
@@ -637,10 +643,10 @@ public class AI{
                     if(evals.get(j)-maxEval>0){
                         storedLocs = j;
                         maxEval = evals.get(j);
-                        System.out.println(evals.get(j));
-                        System.out.println(storedIndex.get(j));
-                        System.out.println(pieceTag.get(j));
+                        
                     }
+                    System.out.println(pieceTag.get(j) + "  " + moveX.get(j) + " " +  moveY.get(j) + " evaluation " + evals.get(j));
+                    
                 }
                 if(player.getPlayerTurn()==board.getTurn()&&storedIndex.size()>0){
                     int storedIndexs = storedIndex.get(storedLocs);
