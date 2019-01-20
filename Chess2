@@ -336,7 +336,9 @@ Open the settings page
     public void keyPressed(KeyEvent e) {}  
     public void keyReleased(KeyEvent e) {
         
-        
+        if(e.getKeyChar() == 'e'){
+            
+        }
         board.isInCheck();
         
        ai.smartMove();
@@ -719,7 +721,7 @@ Open the settings page
                     boards[7][4] = "00000";
                     System.out.println("KingWhite x and y " + kingWhite.getX() + " " +  kingWhite.getY());
                     board.updateBoard(boards);
-                board.switchTurn();
+                
                 ai.addMove();
                 }    
                 else{
@@ -738,7 +740,7 @@ Open the settings page
                     boards[0][4] = "00000";
                     System.out.println("KingBlack x and y " + kingBlack.getX() + " " +  kingWhite.getY());
                     board.updateBoard(boards);
-                    board.switchTurn();
+                    
                     ai.addMove();
                 }
                 else{
@@ -758,7 +760,7 @@ Open the settings page
                     boards[7][4] = "00000";
                     System.out.println("KingWhite x and y " + kingWhite.getX() + " " +  kingWhite.getY());
                     board.updateBoard(boards);
-                    board.switchTurn();
+                    
                     ai.addMove();
                 }
                 else{
@@ -779,7 +781,7 @@ Open the settings page
                     boards[0][4] = "00000";
                     System.out.println("KingWhite x and y " + kingWhite.getX() + " " +  kingWhite.getY());
                     board.updateBoard(boards);
-                    board.switchTurn();
+                   
                     ai.addMove();
                 }
                 else{
