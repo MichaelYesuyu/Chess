@@ -86,7 +86,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     BufferedImage backbuffer;//graphisc will be drawn on this so there is no buffering and flickering 
     Thread gameloop;//the game thread, used for fps control and the while running loop which is where repaint is managed
     boolean setFill = false;//used for determining when a square should be drawn as a black square and a white square in gameUpdate()
-    int gamestate = 2;
+    int gamestate = 0;
     boolean specialOn = false;
     int totalMovecount = 0;
     ArrayList<Integer> blackMovesX= new ArrayList<>();// these four arrayLists below store the current possible moves of both white and black
@@ -112,6 +112,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     Player white;
     Player black;
     boolean updateState = true;
+    boolean displayLoadingScreen = false;
     public Chess2(){    
         super("Chess Game");//tittle is chess game
         addMouseListener(this);//the mouselisteners, listens for any mouse events 
@@ -156,8 +157,9 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                 e.printStackTrace();//if for somereason there is an error, print where it occured 
             }
             displayBoard++;
-            if(displayBoard>13){//delays the load in order to avoid buffering of the Images as they load to the screen, it takes 12 loops for buffering to stop
+            if(displayBoard>50){//delays the load in order to avoid buffering of the Images as they load to the screen, it takes 12 loops for buffering to stop
                 setVisible(true);
+        
             }
             if(updateState){
                 setBoard(board.getBoard());
@@ -185,6 +187,14 @@ Open the settings page
         //THIS IS DRAWN NO MATTER WHAT 
         g2d.setColor(Color.WHITE);//sets the color to white because that is the first color that we need 
         g2d.fillRect(0, 0,800,800);
+        if(gamestate==0){
+            g2d.setColor(Color.BLACK);
+            g2d.fill(new Rectangle(200,400,100,100));
+            g2d.fill(new Rectangle(400,400,100,100));
+            g2d.setColor(Color.WHITE);
+            g2d.drawString("Start",440,450);
+            g2d.drawString("Directions",220,450);
+        }
         if(gamestate >=2){
             for(int i =7; i >= 0; i--){//a two by two loop, starts from the bottom at 7,7 for formating purposes
 
@@ -319,7 +329,12 @@ Open the settings page
                 g2d.drawImage(blackRook.getImage(),100+75*5,700,this);
                 
         }
-        
+        if(displayLoadingScreen){
+            g2d.setColor(Color.WHITE);//sets the color to white because that is the first color that we need 
+            g2d.fillRect(0, 0,800,800);
+            g2d.setColor(Color.BLACK);
+            g2d.drawString("Loading",350,400);
+        }
         repaint();//calls the redraw of the buffered image that the graphics are drawn on so that it is constantly updated
     }
     /**
@@ -375,6 +390,14 @@ Open the settings page
         for(int i =blackOtherMovesX.size()-1; i >-1;i--){
             blackOtherMovesX.remove(i);
             blackOtherMovesY.remove(i);
+        }
+        if(gamestate ==0){
+         if(mouseX >=400&&mouseX<=500&&mouseY>=400&mouseY<=500){
+             displayBoard = 0;//give time for the Board to render in the graphics 
+             setVisible(false);
+             gamestate = 2;
+             
+         }   
         }
         if(gamestate==3){//if we are in a state where a white pawn has been passed
             
