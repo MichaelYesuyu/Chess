@@ -9,6 +9,10 @@ Engine is unable to play move when player promotes a piece
 
 Undo Move does not work with the engine as it messes up its algorithm
 
-Current version Engine can only play as black
+Current version Engine can play as either color but must be switched manually in code
+
+
+
+
 
 
