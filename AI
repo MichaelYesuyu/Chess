@@ -45,7 +45,10 @@ public class AI{
     }
     //blank constructor to throw null pointer exception 
     public AI(){
-        
+        isActive = false;
+    }
+    public ArrayList<String> allMoves(){
+        return this.allMoves;
     }
     /**
      * Used to pick our opening move 
@@ -277,7 +280,9 @@ public class AI{
                         for(int i =0 ; i< 8; i++){
                             if(player.pawns[i].getX()==locX&&player.pawns[i].getY()==locY){
                                 player.pawns[i].checkLegalMove();
+                                
                                 player.pawns[i].checkPossibleMoves(newLocX,newLocY);
+                                System.out.println(player.pawns[i].getX() + " " + player.pawns[i].getY());
                                 board.switchTurn();
                             }
                         }
@@ -579,6 +584,7 @@ public class AI{
                         }else if(allMoves.size()>=6){
                             bonus -=.2;
                         }
+                        
                         System.out.println(player.pawns[i].getTag()+ " " + cloneX.get(j) + "  "+ cloneY.get(j));
                         player.pawns[i].checkLegalMove();
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
@@ -592,7 +598,7 @@ public class AI{
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
-                            //board.setCheckMessage("AI WINS GG");
+                            board.setCheckMessage("AI WINS GG");
                             bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
@@ -652,6 +658,11 @@ public class AI{
                         else if(allMoves.size()>=6){
                             bonus -=.2;
                         }
+                        if(player.getPlayerTurn()&&player.bishops[i].getMoveCount()>0&&cloneY.get(j)==7){
+                            bonus-=0.01;
+                        }else if(!player.getPlayerTurn()&&player.bishops[i].getMoveCount()>0&&cloneY.get(j)==0){
+                            bonus-=0.01;
+                        }
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
                         
                         player.bishops[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
@@ -663,7 +674,7 @@ public class AI{
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
-                           // board.setCheckMessage("AI WINS GG");
+                            board.setCheckMessage("AI WINS GG");
                             bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
@@ -684,7 +695,7 @@ public class AI{
 
                 }
                 for(int i =0; i < 2;i++){
-                    player.pawns[i].checkLegalMove();
+                   
                     player.rooks[i].deleteMoves();
                     player.rooks[i].checkLegalMove();
                     int storedX = player.rooks[i].getX();
@@ -710,6 +721,11 @@ public class AI{
                         }else if(allMoves.size()>=6){
                             bonus -=.2;
                         }
+                        if(player.getPlayerTurn()&&player.rooks[i].getMoveCount()>0&&cloneY.get(j)==7){
+                            bonus-=0.01;
+                        }else if(!player.getPlayerTurn()&&player.rooks[i].getMoveCount()>0&&cloneY.get(j)==0){
+                            bonus-=0.01;
+                        }
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
                         
                         player.rooks[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
@@ -721,7 +737,7 @@ public class AI{
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
-                            //board.setCheckMessage("AI WINS GG");
+                            board.setCheckMessage("AI WINS GG");
                             bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
@@ -769,6 +785,10 @@ public class AI{
                         }
                         else if(allMoves.size()>=6){
                             bonus -=.2;
+                        }if(player.getPlayerTurn()&&player.knights[i].getMoveCount()>0&&cloneY.get(j)==7){
+                            bonus-=0.01;
+                        }else if(!player.getPlayerTurn()&&player.knights[i].getMoveCount()>0&&cloneY.get(j)==0){
+                            bonus-=0.01;
                         }
                         player.knights[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.knights[i].getTag(),player.knights[i].getX(),player.knights[i].getY());
@@ -780,7 +800,7 @@ public class AI{
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
-                            //board.setCheckMessage("AI WINS GG");
+                            board.setCheckMessage("AI WINS GG");
                             bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
@@ -828,6 +848,11 @@ public class AI{
                         }else if(allMoves.size()>=6){
                             bonus -=.2;
                         }
+                        if(player.getPlayerTurn()&&player.queen.getMoveCount()>0&&cloneY.get(j)==7){
+                            bonus-=0.01;
+                        }else if(!player.getPlayerTurn()&&player.queen.getMoveCount()>0&&cloneY.get(j)==0){
+                            bonus-=0.01;
+                        }
                         player.queen.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.queen.getTag(),player.queen.getX(),player.queen.getY());
                         
@@ -835,10 +860,11 @@ public class AI{
                            bonus = 0.25; 
                            System.out.println("queen is checking the king ");
                         }
+                        
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
-                            //board.setCheckMessage("AI WINS GG");
+                            board.setCheckMessage("AI WINS GG");
                             bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
@@ -885,12 +911,14 @@ public class AI{
                         double bonus = 0; 
                         if(player.king.special.get(j).startsWith("castle")){
                             bonus =0.15;
+                            
                         }
                         if(isProtectedSquare(cloneX.get(j),cloneY.get(j))){
-                            bonus += 0.2;
-                        }else if(allMoves.size()>=6){
+                            bonus -= 0.01;
+                        }else if(allMoves.size()>6){
                             bonus -=.2;
                         }
+                        
                         player.king.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.king.getTag(),player.king.getX(),player.king.getY());
                         
@@ -900,7 +928,7 @@ public class AI{
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
-                            //board.setCheckMessage("AI WINS GG");
+                            board.setCheckMessage("AI WINS GG");
                             bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
