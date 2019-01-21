@@ -379,7 +379,7 @@ Open the settings page
         
        ai.smartMove();
 
-       if(ai.player.getPlayerTurn()&&ai.allMoves().size()==1){
+       if(ai.player.getPlayerTurn()&&ai.allMoves.size()==1){
            setBoard(board.getBoard());
        }
     }
