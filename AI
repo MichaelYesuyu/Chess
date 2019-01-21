@@ -559,6 +559,10 @@ public class AI{
                         
                         player.pawns[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.pawns[i].getTag(),player.pawns[i].getX(),player.pawns[i].getY());
+                        double checkbonus = 0; 
+                        if(board.isInSpecificCheck(enemy.getPlayerTurn())){
+                           checkbonus = 0.2; 
+                        }
                         player.deleteMoves();
                         enemy.deleteMoves();
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
@@ -570,7 +574,7 @@ public class AI{
                         }else{
                            
                             if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                                evals.add(evalBoard(player.getPlayerTurn()));
+                                evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
                                 moveX.add(cloneX.get(j));
                                 moveY.add(cloneY.get(j));
                                 storedIndex.add(i);
@@ -609,10 +613,14 @@ public class AI{
                         
                         player.bishops[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.bishops[i].getTag(),player.bishops[i].getX(),player.bishops[i].getY());
+                        double checkbonus = 0; 
+                        if(board.isInSpecificCheck(enemy.getPlayerTurn())){
+                           checkbonus = 0.2; 
+                        }
                         player.deleteMoves();
                         enemy.deleteMoves();
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                            evals.add(evalBoard(player.getPlayerTurn()));
+                            evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
                             moveX.add(cloneX.get(j));
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
@@ -649,10 +657,14 @@ public class AI{
                         
                         player.rooks[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.rooks[i].getTag(),player.rooks[i].getX(),player.rooks[i].getY());
-                       player.deleteMoves();
+                        double checkbonus = 0; 
+                        if(board.isInSpecificCheck(enemy.getPlayerTurn())){
+                           checkbonus = 0.2; 
+                        }
+                        player.deleteMoves();
                         enemy.deleteMoves();
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                            evals.add(evalBoard(player.getPlayerTurn()));
+                            evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
                             moveX.add(cloneX.get(j));
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
@@ -689,10 +701,14 @@ public class AI{
                        
                         player.knights[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.knights[i].getTag(),player.knights[i].getX(),player.knights[i].getY());
+                        double checkbonus = 0; 
+                        if(board.isInSpecificCheck(enemy.getPlayerTurn())){
+                           checkbonus = 0.2; 
+                        }
                         player.deleteMoves();
                         enemy.deleteMoves();
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                            evals.add(evalBoard(player.getPlayerTurn()));
+                            evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
                             moveX.add(cloneX.get(j));
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
@@ -729,9 +745,13 @@ public class AI{
                         
                         player.queen.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.queen.getTag(),player.queen.getX(),player.queen.getY());
+                        double checkbonus = 0; 
+                        if(board.isInSpecificCheck(enemy.getPlayerTurn())){
+                           checkbonus = 0.2; 
+                        }
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
                             
-                            evals.add(evalBoard(player.getPlayerTurn()));
+                            evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
                             moveX.add(cloneX.get(j));
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
@@ -771,10 +791,14 @@ public class AI{
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
                         player.king.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.king.getTag(),player.king.getX(),player.king.getY());
+                        double checkbonus = 0; 
+                        if(board.isInSpecificCheck(enemy.getPlayerTurn())){
+                           checkbonus = 0.2; 
+                        }
                         player.deleteMoves();
                         enemy.deleteMoves();
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){      
-                            evals.add(evalBoard(player.getPlayerTurn()));
+                            evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
                             moveX.add(cloneX.get(j));
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
