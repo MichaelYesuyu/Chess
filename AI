@@ -592,7 +592,7 @@ public class AI{
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
-                            board.setCheckMessage("AI WINS GG");
+                            //board.setCheckMessage("AI WINS GG");
                             bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
@@ -663,7 +663,7 @@ public class AI{
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
-                            board.setCheckMessage("AI WINS GG");
+                           // board.setCheckMessage("AI WINS GG");
                             bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
@@ -721,7 +721,7 @@ public class AI{
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
-                            board.setCheckMessage("AI WINS GG");
+                            //board.setCheckMessage("AI WINS GG");
                             bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
@@ -780,7 +780,7 @@ public class AI{
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
-                            board.setCheckMessage("AI WINS GG");
+                            //board.setCheckMessage("AI WINS GG");
                             bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
@@ -838,7 +838,7 @@ public class AI{
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
-                            board.setCheckMessage("AI WINS GG");
+                            //board.setCheckMessage("AI WINS GG");
                             bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
@@ -900,7 +900,7 @@ public class AI{
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
-                            board.setCheckMessage("AI WINS GG");
+                            //board.setCheckMessage("AI WINS GG");
                             bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
