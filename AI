@@ -414,7 +414,7 @@ public class AI{
                         System.out.println("hey we are looking at this " + " piece tag " + board.getBoard()[i][j] + " " +(1+(0.1*(7-i)) + (0.2*(jconstant + (7-i)))- handleMove(j,i, (1+0.1*(7-i)))));
                     }
                     
-                    whiteTotal+=1+(0.1*(7-i)) + (0.05*(jconstant + (7-i)))- handleMove(j,i, (1+0.1*(7-i)));
+                    whiteTotal+=1+(0.01*(7-i)) + (0.05*(jconstant + (7-i)))- handleMove(j,i, (1+0.01*(7-i)));
                     
                 }
                 if(board.getBoard()[i][j].startsWith("wR")){
@@ -439,7 +439,7 @@ public class AI{
                 if(board.getBoard()[i][j].startsWith("bP")){
                    int jconstant = 0+j; 
                    if(j >=3){jconstant=7-j;}
-                    blackTotal+=1+(0.1*i) +(0.05*(jconstant+i))- handleMove(j,i, (1+(0.1*i)));
+                    blackTotal+=1+(0.01*i) +(0.05*(jconstant+i))- handleMove(j,i, (1+(0.01*i)));
                     
                 }
                 if(board.getBoard()[i][j].startsWith("bR")){
@@ -563,8 +563,13 @@ public class AI{
                         if(board.isInSpecificCheck(enemy.getPlayerTurn())){
                            checkbonus = 0.2; 
                         }
-                        player.deleteMoves();
                         enemy.deleteMoves();
+                        enemy.updateLegals();
+                        if(enemy.movesX.isEmpty()){
+                            board.setCheckMessage("AI WINS GG");
+                            checkbonus+=1000;
+                            System.out.println("chekcmate gg man gg man gg man ");
+                        }
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
                             evals.add(evalBoard(player.getPlayerTurn()));
                             moveX.add(cloneX.get(j));
@@ -617,8 +622,13 @@ public class AI{
                         if(board.isInSpecificCheck(enemy.getPlayerTurn())){
                            checkbonus = 0.2; 
                         }
-                        player.deleteMoves();
                         enemy.deleteMoves();
+                        enemy.updateLegals();
+                        if(enemy.movesX.isEmpty()){
+                            board.setCheckMessage("AI WINS GG");
+                            checkbonus+=1000;
+                            System.out.println("chekcmate gg man gg man gg man ");
+                        }
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
                             evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
                             moveX.add(cloneX.get(j));
@@ -661,8 +671,13 @@ public class AI{
                         if(board.isInSpecificCheck(enemy.getPlayerTurn())){
                            checkbonus = 0.2; 
                         }
-                        player.deleteMoves();
                         enemy.deleteMoves();
+                        enemy.updateLegals();
+                        if(enemy.movesX.isEmpty()){
+                            board.setCheckMessage("AI WINS GG");
+                            checkbonus+=1000;
+                            System.out.println("chekcmate gg man gg man gg man ");
+                        }
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
                             evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
                             moveX.add(cloneX.get(j));
@@ -705,8 +720,13 @@ public class AI{
                         if(board.isInSpecificCheck(enemy.getPlayerTurn())){
                            checkbonus = 0.2; 
                         }
-                        player.deleteMoves();
                         enemy.deleteMoves();
+                        enemy.updateLegals();
+                        if(enemy.movesX.isEmpty()){
+                            board.setCheckMessage("AI WINS GG");
+                            checkbonus+=1000;
+                            System.out.println("chekcmate gg man gg man gg man ");
+                        }
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
                             evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
                             moveX.add(cloneX.get(j));
@@ -748,6 +768,14 @@ public class AI{
                         double checkbonus = 0; 
                         if(board.isInSpecificCheck(enemy.getPlayerTurn())){
                            checkbonus = 0.2; 
+                           System.out.println("queen is checking the king ");
+                        }
+                        enemy.deleteMoves();
+                        enemy.updateLegals();
+                        if(enemy.movesX.isEmpty()){
+                            board.setCheckMessage("AI WINS GG");
+                            checkbonus+=1000;
+                            System.out.println("chekcmate gg man gg man gg man ");
                         }
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
                             
@@ -795,8 +823,13 @@ public class AI{
                         if(board.isInSpecificCheck(enemy.getPlayerTurn())){
                            checkbonus = 0.2; 
                         }
-                        player.deleteMoves();
                         enemy.deleteMoves();
+                        enemy.updateLegals();
+                        if(enemy.movesX.isEmpty()){
+                            board.setCheckMessage("AI WINS GG");
+                            checkbonus+=1000;
+                            System.out.println("chekcmate gg man gg man gg man ");
+                        }
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){      
                             evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
                             moveX.add(cloneX.get(j));
@@ -817,19 +850,17 @@ public class AI{
                 double maxEval = -2000;
                 int storedLocs =0;
                 for(int j =0; j < evals.size();j++){
-                    System.out.println(evals.get(j));
+                    System.out.println(pieceTag.get(j) + " " + evals.get(j));
                     if(evals.get(j)>maxEval){
                         storedLocs = j;
                         maxEval = evals.get(j);
                         
                     }
-                    System.out.println(pieceTag.get(j) + "  " + moveX.get(j) + " " +  moveY.get(j) + " evaluation " + evals.get(j));
+                   
                     
                 }
                 if(player.getPlayerTurn()==board.getTurn()&&storedIndex.size()>0){
                     int storedIndexs = storedIndex.get(storedLocs);
-                    System.out.println(storedLocs);
-                    System.out.println(player.pawns[storedIndex.get(storedLocs)].getX() +  " Player " + player.pawns[storedIndex.get(storedLocs)].getY());
                     char switchable = pieceTag.get(storedLocs).charAt(1);
                     switch(switchable){
                         case 'P':
