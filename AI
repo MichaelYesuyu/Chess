@@ -511,6 +511,23 @@ public class AI{
         }
     }
     /**
+     * Checks if we protect a square, used to moving to a protected square
+     * @param x the x location of the square
+     * @param y the y location of the square 
+     * @return if we protect it or not 
+     */
+    public boolean isProtectedSquare(int x, int y){
+        player.updateLegals();
+        for(int i =0; i < player.movesX.size();i++){
+            if(player.movesX.get(i)==x&&player.movesY.get(i)==y){
+                
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    /**
      * The main part of the ai class and it is where all of our functions are put together 
      * First if we are in the opening state play out opening 
      * Else play out evaluation 
@@ -553,23 +570,33 @@ public class AI{
                         System.out.println("so we are considering mulitple");
                     }
                     for(int j =0; j < cloneY.size();j++){
+                        double bonus = 0; 
+                        if(player.pawns[i].getMoveCount()==0){
+                            bonus =0.05;
+                        }
+                        if(isProtectedSquare(cloneX.get(j),cloneY.get(j))){
+                            bonus += 0.05;
+                        }else if(allMoves.size()>=6){
+                            bonus -=.2;
+                        }
                         System.out.println(player.pawns[i].getTag()+ " " + cloneX.get(j) + "  "+ cloneY.get(j));
                         player.pawns[i].checkLegalMove();
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
                         
                         player.pawns[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.pawns[i].getTag(),player.pawns[i].getX(),player.pawns[i].getY());
-                        double checkbonus = 0; 
+                        
                         if(board.isInSpecificCheck(enemy.getPlayerTurn())){
-                           checkbonus = 0.2; 
+                           bonus = 0.25; 
                         }
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
                             board.setCheckMessage("AI WINS GG");
-                            checkbonus+=1000;
+                            bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
+                        
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
                             evals.add(evalBoard(player.getPlayerTurn()));
                             moveX.add(cloneX.get(j));
@@ -579,12 +606,13 @@ public class AI{
                         }else{
                            
                             if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                                evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
+                                evals.add(evalBoard(player.getPlayerTurn())+bonus);
                                 moveX.add(cloneX.get(j));
                                 moveY.add(cloneY.get(j));
                                 storedIndex.add(i);
                                 pieceTag.add(player.pawns[i].getTag());
                             }
+                            
                             
                         }
                         
@@ -614,23 +642,33 @@ public class AI{
 
                     for(int j =0; j < cloneY.size();j++){
                         player.bishops[i].checkLegalMove();    
+                        double bonus = 0; 
+                        if(player.bishops[i].getMoveCount()==0){
+                            bonus =0.03;
+                        }
+                        if(isProtectedSquare(cloneX.get(j),cloneY.get(j))){
+                            bonus += 0.2;
+                        }
+                        else if(allMoves.size()>=6){
+                            bonus -=.2;
+                        }
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
                         
                         player.bishops[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.bishops[i].getTag(),player.bishops[i].getX(),player.bishops[i].getY());
-                        double checkbonus = 0; 
+                       
                         if(board.isInSpecificCheck(enemy.getPlayerTurn())){
-                           checkbonus = 0.2; 
+                            bonus = 0.25; 
                         }
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
                             board.setCheckMessage("AI WINS GG");
-                            checkbonus+=1000;
+                            bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                            evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
+                            evals.add(evalBoard(player.getPlayerTurn())+bonus);
                             moveX.add(cloneX.get(j));
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
@@ -663,23 +701,32 @@ public class AI{
                     for(int j =0; j < cloneY.size();j++){
                         
                         player.rooks[i].checkLegalMove();    
+                        double bonus = 0; 
+                        if(player.rooks[i].getMoveCount()==0){
+                            bonus =0.05;
+                        }
+                        if(isProtectedSquare(cloneX.get(j),cloneY.get(j))){
+                            bonus += 0.1;
+                        }else if(allMoves.size()>=6){
+                            bonus -=.2;
+                        }
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
                         
                         player.rooks[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.rooks[i].getTag(),player.rooks[i].getX(),player.rooks[i].getY());
-                        double checkbonus = 0; 
+                       
                         if(board.isInSpecificCheck(enemy.getPlayerTurn())){
-                           checkbonus = 0.2; 
+                           bonus = 0.25; 
                         }
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
                             board.setCheckMessage("AI WINS GG");
-                            checkbonus+=1000;
+                            bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                            evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
+                            evals.add(evalBoard(player.getPlayerTurn())+bonus);
                             moveX.add(cloneX.get(j));
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
@@ -713,22 +760,32 @@ public class AI{
                         
                         player.knights[i].checkLegalMove();
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
-                       
+                        double bonus = 0; 
+                        if(player.knights[i].getMoveCount()==0){
+                            bonus =0.03;
+                        }
+                        if(isProtectedSquare(cloneX.get(j),cloneY.get(j))){
+                            bonus +=0.2;
+                        }
+                        else if(allMoves.size()>=6){
+                            bonus -=.2;
+                        }
                         player.knights[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.knights[i].getTag(),player.knights[i].getX(),player.knights[i].getY());
-                        double checkbonus = 0; 
+                        
                         if(board.isInSpecificCheck(enemy.getPlayerTurn())){
-                           checkbonus = 0.2; 
+                           bonus = 0.25; 
                         }
+                        
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
                             board.setCheckMessage("AI WINS GG");
-                            checkbonus+=1000;
+                            bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                            evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
+                            evals.add(evalBoard(player.getPlayerTurn())+bonus);
                             moveX.add(cloneX.get(j));
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
@@ -762,24 +819,32 @@ public class AI{
                         
                         player.queen.checkLegalMove();
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
-                        
+                        double bonus = 0; 
+                        //make sure we have made a few moves before we add a bonus to moving the queen
+                        if(player.queen.getMoveCount()==0&&allMoves.size()>10){
+                            bonus =0.09;
+                        }if(isProtectedSquare(cloneX.get(j),cloneY.get(j))){
+                            bonus += 0.2;
+                        }else if(allMoves.size()>=6){
+                            bonus -=.2;
+                        }
                         player.queen.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.queen.getTag(),player.queen.getX(),player.queen.getY());
-                        double checkbonus = 0; 
+                        
                         if(board.isInSpecificCheck(enemy.getPlayerTurn())){
-                           checkbonus = 0.2; 
+                           bonus = 0.25; 
                            System.out.println("queen is checking the king ");
                         }
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
                             board.setCheckMessage("AI WINS GG");
-                            checkbonus+=1000;
+                            bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
                             
-                            evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
+                            evals.add(evalBoard(player.getPlayerTurn())+bonus);
                             moveX.add(cloneX.get(j));
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
@@ -817,21 +882,30 @@ public class AI{
                         //player.king.checkLegalMove();
                         player.king.checkLegalMove();
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
+                        double bonus = 0; 
+                        if(player.king.special.get(j).startsWith("castle")){
+                            bonus =0.15;
+                        }
+                        if(isProtectedSquare(cloneX.get(j),cloneY.get(j))){
+                            bonus += 0.2;
+                        }else if(allMoves.size()>=6){
+                            bonus -=.2;
+                        }
                         player.king.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.king.getTag(),player.king.getX(),player.king.getY());
-                        double checkbonus = 0; 
+                        
                         if(board.isInSpecificCheck(enemy.getPlayerTurn())){
-                           checkbonus = 0.2; 
+                           bonus = 0.25; 
                         }
                         enemy.deleteMoves();
                         enemy.updateLegals();
                         if(enemy.movesX.isEmpty()){
                             board.setCheckMessage("AI WINS GG");
-                            checkbonus+=1000;
+                            bonus+=1000;
                             System.out.println("chekcmate gg man gg man gg man ");
                         }
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){      
-                            evals.add(evalBoard(player.getPlayerTurn())+checkbonus);
+                            evals.add(evalBoard(player.getPlayerTurn())+bonus);
                             moveX.add(cloneX.get(j));
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
