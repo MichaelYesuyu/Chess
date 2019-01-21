@@ -28,6 +28,7 @@ public class Board {
     Player black; 
     boolean turn = true;
     boolean ready = false;
+    String checkmessage = "";
     /**
      * 
      * @param boards the board array, or the public board is initiated using another array, this allows for creation from files 
@@ -45,6 +46,12 @@ public class Board {
     }
     public boolean isReady(){
         return ready;
+    }
+    public void setCheckMessage(String checkmessage){
+        this.checkmessage = checkmessage;
+    }
+    public String getCheckMessage(){
+        return this.checkmessage;
     }
     /**
      * Here we add all of the last moves that were made to the move recorder array list 
