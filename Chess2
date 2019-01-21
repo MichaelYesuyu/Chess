@@ -113,6 +113,8 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     Player black;
     boolean updateState = true;
     boolean displayLoadingScreen = false;
+    String type1Tag = "Human";
+    String type2Tag = "Human";
     public Chess2(){    
         super("Chess Game");//tittle is chess game
         addMouseListener(this);//the mouselisteners, listens for any mouse events 
@@ -144,7 +146,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
         black = new Player(board,pawnsBlack, rooksBlack, knightsBlack, bishopsBlack, queenBlack,kingBlack,false);
         board.setBlack(black);
         board.setWhite(white);
-        ai = new AI(black,board,white);
+        ai = new AI(white,board,black);
         board.setReady(true);
     }
     
@@ -195,7 +197,22 @@ Open the settings page
             g2d.drawString("Start",440,450);
             g2d.drawString("Directions",220,450);
         }
-        if(gamestate >=2){
+        if(gamestate==5){
+            g2d.setColor(Color.BLACK);
+            g2d.fill(new Rectangle(499,399,102,102));
+            g2d.setColor(Color.WHITE);
+            g2d.fill(new Rectangle(500,400,100,100));
+            g2d.setColor(Color.BLACK);
+            
+            g2d.fill(new Rectangle(200,400,100,100));
+            g2d.setColor(Color.BLACK);
+            g2d.drawString(type2Tag ,540,450); 
+            
+            g2d.setColor(Color.WHITE);
+            g2d.drawString(type1Tag,240,450);
+            
+        }
+        if(gamestate >=2&&gamestate<=4){
             for(int i =7; i >= 0; i--){//a two by two loop, starts from the bottom at 7,7 for formating purposes
 
                 for(int j =7; j >= 0; j--){
@@ -348,15 +365,23 @@ Open the settings page
         
     }
     public void keyTyped(KeyEvent e) {}
-    public void keyPressed(KeyEvent e) {}  
+    public void keyPressed(KeyEvent e) {}
+    /**
+     * here we move handle any ai moves if we can make a move
+     * the if statement handles a bug where the board wasn't updating 
+     * @param e the key event
+     */
     public void keyReleased(KeyEvent e) {
         
         if(e.getKeyChar() == 'e'){
             
         }
-        board.isInCheck();
         
        ai.smartMove();
+
+       if(ai.player.getPlayerTurn()&&ai.allMoves().size()==1){
+           setBoard(board.getBoard());
+       }
     }
     public void mouseDragged(MouseEvent e ){}
     public void mouseMoved(MouseEvent e){}
@@ -398,6 +423,9 @@ Open the settings page
              gamestate = 2;
              
          }   
+        }
+        if(gamestate==5){
+            
         }
         if(gamestate==3){//if we are in a state where a white pawn has been passed
             
