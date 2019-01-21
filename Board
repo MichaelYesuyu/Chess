@@ -66,7 +66,42 @@ public class Board {
     public void setBlack(Player player){
         this.black = player;
     }
-    
+    /**
+     * Checks whether or not a specific player is in check, this way we can allow for checks in ai 
+     * Delete the legal moves, and then update them(so no duplicates for processing efficiency) 
+     * If our players king location is in the moves of the enemy, we are in check 
+     * @param turn determines which player we are considering 
+     * @return whether or not the player we are considering is in check 
+     */
+    public boolean isInSpecificCheck(boolean turn){
+        black.deleteMoves();//clear our moves 
+        white.deleteMoves();
+        black.updateLegals();
+        for(int i =0; i < black.movesX.size();i++){
+            if(turn&&white.king.getX()==black.movesX.get(i)&&white.king.getY()==black.movesY.get(i)){
+                black.deleteMoves();
+                System.out.println("is in check  because yeah yeah white checkin black ooh ARGH WORK");
+                return true;
+            }
+        }
+        black.deleteMoves();
+        
+        white.updateLegals();
+        for(int i =0; i < white.movesX.size();i++){
+            if(!turn&&black.king.getX()==white.movesX.get(i)&&black.king.getY()==white.movesY.get(i)){
+                white.deleteMoves();
+                System.out.println("is in check because yeah yeah  black checkin white ooh lil check plz work why no work");
+                return true;
+            }
+        }
+        white.deleteMoves();
+        return false;
+    }
+    /**
+     * Same as seperate check but makes sure neither player is in check 
+     * The ai cannot move if there is a check(prevents it from taking the king) if it checkmates  
+     * @return whether or not there is a check detected, uses same method as above 
+     */
     public boolean isInCheck(){
         black.deleteMoves();//clear our moves 
         white.deleteMoves();
