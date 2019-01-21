@@ -1,5 +1,5 @@
 /**
-Chess Interface Version 2.12
+Chess Interface Version 0.812
 *What we have done so far 
     *All rules are working including basic moves, check, checkmate, en passant and castling
     *We have not included threefold repetition because it requires excessive computational power and will significantly slow down program
@@ -11,11 +11,9 @@ Chess Interface Version 2.12
 */
 /**
  * Tentative Schedule for before the break 
-    *Make so opening can play more than 2 moves 
-    * Make so end game isn't scuffed
-    * Add another layer of move making 
-    * Improve to alpha beta pruning algo 
-    * Make second and third layers 
+    *By December First: Fix all the bugs and comment everything 
+    * By December Third: Have a finished U.I with home page, directions, settings, music, and other effects 
+    * By the Break: start exploring nodes and add file paths to store board positions potentially 
  */
 /**
  * Bugs to fix EVERY TIME A BUG OCCURS ADD IT TO THE LIST AND UPDATE DRIVE WITH THE NEW LIST
@@ -42,7 +40,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMotionListener, KeyListener{
+public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMotionListener{
     Images whiteRook = new Images("whiterook.png");//creates new Images, all of whitch are displayed in gameUpdate
     Images whiteKnight = new Images("whiteknight.png");
     Images whiteBishop = new Images("whitebishop.png");
@@ -55,7 +53,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     Images blackQueen = new Images("blackqueen.png");
     Images blackKing= new Images("blackking.png");
     Images blackPawn = new Images("blackpawn.png");
-    String[][] boards ={//an 8 by 8 array representing the Board the Board is meant to be transfered between the Board class and this class so that the ai can keep track of the Board, setup in Board
+    String[][] boardsClone ={//an 8 by 8 array representing the Board the Board is meant to be transfered between the Board class and this class so that the ai can keep track of the Board, setup in Board
             {"bR260","bH270","bB280","bQ290","bK300","bB310","bH320","bR330"},//each piece has a tag, the first char is the color, second is type, and third is id  
             {"bP340","bP350","bP360","bP370","bP380","bP390","bP400","bP410"},//tags are used to calculate the legal moves available, and differentiate between pieces of the same type
             {"00000", "00000","00000","00000", "00000","00000","00000", "00000"},//these all represent the blank squares 
@@ -66,6 +64,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
             {"wR100","wH110","wB120","wQ130","wK140","wB150","wH160","wR170"},//the first char is the color, and the second is the type the last two digits are the piece id
     
             };
+    Piece[][] boards = new Piece[8][8];
     boolean turn = true; //whites turn = true, blacks turn = false
     Board board = new Board(boards);//creates a new Board with this array, in order to allow for flipage in the future Board can be created from any array, however Board makes assumptions based on the array being chess focused 
     Pawn[] pawnsWhite = new Pawn[8];//creates pieces, will be further setup in the constructor, in array form so the code is less redundant and 
@@ -76,11 +75,14 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     Knight[] knightsBlack = new Knight[2];
     Bishop[] bishopsWhite = new Bishop[2];
     Bishop[] bishopsBlack = new Bishop[2];
-    Queen queenBlack = new Queen(board,3,0,Integer.parseInt(boards[0][3].substring(2,4)),'b');//no need to setup in constructor as it is not an array
-    Queen queenWhite = new Queen(board,3,7,Integer.parseInt(boards[7][3].substring(2,4)),'w');
-    King kingBlack = new King(board,4,0,Integer.parseInt(boards[0][4].substring(2,4)),'b');
-    King kingWhite = new King(board,4,7,Integer.parseInt(boards[7][4].substring(2,4)),'w');
-    int saveK = 0;//when the mouse is pressed, it stores the specific piece that was pressed because some pieces are stored in array, this way when released we can immediately know which piece, was selected, see mousePressed() and mouseReleased() for more details
+    Queen queenBlack = new Queen(board,3,0,Integer.parseInt(boardsClone[0][3].substring(2,4)),'b');//no need to setup in constructor as it is not an array
+    Queen queenWhite = new Queen(board,3,7,Integer.parseInt(boardsClone[7][3].substring(2,4)),'w');
+    King kingBlack = new King(board,4,0,Integer.parseInt(boardsClone[0][4].substring(2,4)),'b');
+    King kingWhite = new King(board,4,7,Integer.parseInt(boardsClone[7][4].substring(2,4)),'w');
+    int saveK = 0;
+    int saveX = 0;
+    int saveY = 0;
+//when the mouse is pressed, it stores the specific piece that was pressed because some pieces are stored in array, this way when released we can immediately know which piece, was selected, see mousePressed() and mouseReleased() for more details
     String type  = "";//used to store information about the piece selected in mousepressed so that knowing what moves to check is easier 
     Graphics2D g2d;//creates the graphics to which every thing will be setup  
     BufferedImage backbuffer;//graphisc will be drawn on this so there is no buffering and flickering 
@@ -107,31 +109,36 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     ArrayList<String> checkingPieces = new ArrayList<>();//potential add to look for pieces that are checking the king 
     String checkmessage="";//used  to display the state of the game 
     int displayBoard = 0; 
-    boolean handle = true;//determines whether or not there has been a checkmate 
-    AI ai;
     Player white;
     Player black;
-    boolean updateState = true;
-    boolean displayLoadingScreen = false;
+    boolean handle = true;//determines whether or not there has been a checkmate 
     public Chess2(){    
         super("Chess Game");//tittle is chess game
         addMouseListener(this);//the mouselisteners, listens for any mouse events 
         addMouseMotionListener(this);
-        addKeyListener(this);
+        
         for(int i =0; i< 8; i++){//sets up the pawns 
-           pawnsWhite[i] = new Pawn(board,i,6,Integer.parseInt(boards[6][i].substring(2,4)),'w');//creates the white pawns, see details on constructor in Piece.setup()
-           pawnsBlack[i] = new Pawn(board,i,1,Integer.parseInt(boards[1][i].substring(2,4)),'b');//creates black pawns
-           pawnsWhite[i].checkLegalMove();//gets all the possible legal moves 
+           pawnsWhite[i] = new Pawn(board,i,6,Integer.parseInt(boardsClone[6][i].substring(2,4)),'w');//creates the white pawns, see details on constructor in Piece.setup()
+           pawnsBlack[i] = new Pawn(board,i,1,Integer.parseInt(boardsClone[1][i].substring(2,4)),'b');//creates black pawns
+           
            
         }   
         for(int i =0; i < 2; i++){//setting up the other array based pieces, rook, knight, and bishop
-            rooksWhite[i] = new Rook(board,i+i*6,7,Integer.parseInt(boards[7][i+i*6].substring(2,4)),'w');
-            rooksBlack[i] = new Rook(board,i+i*6,0,Integer.parseInt(boards[0][i+i*6].substring(2,4)),'b');
-            knightsWhite[i] = new Knight(board,1+i*5,7,Integer.parseInt(boards[7][1+i*5].substring(2,4)),'w');
-            knightsBlack[i] = new Knight(board,1+i*5,0,Integer.parseInt(boards[0][1+i*5].substring(2,4)),'b');
-            bishopsWhite[i] = new Bishop(board,2+i*3,7,Integer.parseInt(boards[7][2+i*3].substring(2,4)),'w');
-            bishopsBlack[i] = new Bishop(board,2+i*3,0,Integer.parseInt(boards[0][2+i*3].substring(2,4)),'b');
+            rooksWhite[i] = new Rook(board,i+i*6,7,Integer.parseInt(boardsClone[7][i+i*6].substring(2,4)),'w');
+            rooksBlack[i] = new Rook(board,i+i*6,0,Integer.parseInt(boardsClone[0][i+i*6].substring(2,4)),'b');
+            knightsWhite[i] = new Knight(board,1+i*5,7,Integer.parseInt(boardsClone[7][1+i*5].substring(2,4)),'w');
+            knightsBlack[i] = new Knight(board,1+i*5,0,Integer.parseInt(boardsClone[0][1+i*5].substring(2,4)),'b');
+            bishopsWhite[i] = new Bishop(board,2+i*3,7,Integer.parseInt(boardsClone[7][2+i*3].substring(2,4)),'w');
+            bishopsBlack[i] = new Bishop(board,2+i*3,0,Integer.parseInt(boardsClone[0][2+i*3].substring(2,4)),'b');
          }
+        for(int i =0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                boards[i][j] = new Piece();
+                boards[i][j].setX(j);
+                boards[i][j].setY(i);
+                boards[i][j].setsTag("00000");
+            }
+        }
         
         setSize(800,800);//sets up the window 
         setVisible(false);
@@ -140,14 +147,60 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
         g2d= backbuffer.createGraphics();//more graphics setup 
         gameloop = new Thread(this);//starts the game thread 
         gameloop.start();
-        white = new Player(board,pawnsWhite, rooksWhite, knightsWhite, bishopsWhite, queenWhite,kingWhite,true);
-        black = new Player(board,pawnsBlack, rooksBlack, knightsBlack, bishopsBlack, queenBlack,kingBlack,false);
-        board.setBlack(black);
-        board.setWhite(white);
-        ai = new AI(black,board,white);
-        board.setReady(true);
+        white = new Player(board,pawnsWhite,rooksWhite,bishopsWhite,knightsWhite,kingWhite,queenWhite);
+        black = new Player(board, pawnsBlack,rooksBlack,bishopsBlack,knightsBlack,kingBlack,queenBlack);
+        for(int i =0; i<8;i++){
+            for(int j =0; j < 8; j++){
+                if(boardsClone[i][j].substring(0,2).equals("00")){
+                    boards[i][j] = new Piece();
+                    boards[i][j].setsTag("00000");
+                    boards[i][j].setX(j);
+                    boards[i][j].setY(i);
+                }
+                for(int k =0; k < 8; k++){
+                
+                    if(i==pawnsWhite[k].getY()&&j==pawnsWhite[k].getX()){
+                        boards[i][j] = pawnsWhite[k];
+                    }
+                    if(i==pawnsBlack[k].getY()&&j==pawnsBlack[k].getX()){
+                        boards[i][j] = pawnsBlack[k];
+                    }
+                }
+                for(int k = 0; k < 2; k++){
+                    if(i==rooksWhite[k].getY()&&j==rooksWhite[k].getX()){
+                        boards[i][j] = rooksWhite[k];
+                    }
+                    if(i==rooksBlack[k].getY()&&j==rooksBlack[k].getX()){
+                        boards[i][j] = rooksBlack[k];
+                    }
+                    if(i==bishopsWhite[k].getY()&&j==bishopsWhite[k].getX()){
+                        boards[i][j] = bishopsWhite[k];
+                    }
+                    if(i==bishopsBlack[k].getY()&&j==bishopsBlack[k].getX()){
+                        boards[i][j] = bishopsBlack[k];
+                    }
+                    if(i==knightsWhite[k].getY()&&j==knightsWhite[k].getX()){
+                        boards[i][j] = knightsWhite[k];
+                    }if(i==knightsBlack[k].getY()&&j==knightsBlack[k].getX()){
+                        boards[i][j] = knightsBlack[k];
+                    }
+                    
+                }
+                if(i==queenWhite.getY()&&j==queenWhite.getX()){
+                        boards[i][j] = queenWhite;
+                    }
+                if(i==kingWhite.getY()&&j==kingWhite.getX()){
+                        boards[i][j] = kingWhite;
+                    }
+                if(i==queenBlack.getY()&&j==queenBlack.getX()){
+                        boards[i][j] = queenBlack;
+                    }
+                if(i==kingBlack.getY()&&j==kingBlack.getX()){
+                        boards[i][j] = kingBlack;
+                    }
+            }
+        }
     }
-    
     public void run(){//the while running loop goes here 
          Thread current = Thread.currentThread();
         while(current==gameloop){
@@ -157,15 +210,12 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
                 e.printStackTrace();//if for somereason there is an error, print where it occured 
             }
             displayBoard++;
-            if(displayBoard>50){//delays the load in order to avoid buffering of the Images as they load to the screen, it takes 12 loops for buffering to stop
+            if(displayBoard>13){//delays the load in order to avoid buffering of the Images as they load to the screen, it takes 12 loops for buffering to stop
                 setVisible(true);
-        
-            }
-            if(updateState){
-                setBoard(board.getBoard());
+            }else{
+                setVisible(false);
             }
             gameUpdate();//draws the Board graphics
-        
         }
     }
     /**
@@ -181,7 +231,9 @@ If a gamestate is 2 or 3 or 4 draw the regular Board
  First the blank squares are drawn 
  Next, based on the value for every element in the Board array an image is drawn to represent all the pieces 
  If the gamestate is 5
-Open the settings page  
+Open the settings page
+ If the gamestate is 6 
+  Open the a.i. vs player screen 
      */
     public void gameUpdate(){//where the Board is drawn, draws squares that represent the Board squares, and it takes the boards array, and based off the tags draws the appropriate piece
         //THIS IS DRAWN NO MATTER WHAT 
@@ -195,7 +247,7 @@ Open the settings page
             g2d.drawString("Start",440,450);
             g2d.drawString("Directions",220,450);
         }
-        if(gamestate >=2){
+        if(gamestate >=2  &&gamestate <=4){
             for(int i =7; i >= 0; i--){//a two by two loop, starts from the bottom at 7,7 for formating purposes
 
                 for(int j =7; j >= 0; j--){
@@ -213,56 +265,57 @@ Open the settings page
                         g2d.fill(rect);
 
                     }
+                    if(boards[i][j].returnAlive()){
                     //these Images are all drawn after the drawing of the squares so that the squares don't overlapp the
-                    if(boards[i][j].substring(0,2).equals("wP")){//based on the tag, if the tag, every location on the Board has a tag 
-                            g2d.drawImage(whitePawn.getImage(),100+75*j,100+i*75,this);//draws the image that corresponds to the tag
+                        if(boards[i][j].getTag().substring(0,2).equals("wP")){//based on the tag, if the tag, every location on the Board has a tag 
+                                g2d.drawImage(whitePawn.getImage(),100+75*j,100+i*75,this);//draws the image that corresponds to the tag
 
+                        }
+                        if(boards[i][j].getTag().substring(0,2).equals("wR")){
+                                g2d.drawImage(whiteRook.getImage(),100+75*j,100+i*75,this);
+
+                        }
+                        if(boards[i][j].getTag().substring(0,2).equals("wH")){
+                                g2d.drawImage(whiteKnight.getImage(),100+75*j,100+i*75,this);
+
+                        }
+                        if(boards[i][j].getTag().substring(0,2).equals("wB")){
+                                g2d.drawImage(whiteBishop.getImage(),100+75*j,100+i*75,this);
+
+                        }
+                        if(boards[i][j].getTag().substring(0,2).equals("wQ")){
+                                g2d.drawImage(whiteQueen.getImage(),100+75*j,100+i*75,this);
+
+                        }
+                        if(boards[i][j].getTag().substring(0,2).equals("wK")){
+                                g2d.drawImage(whiteKing.getImage(),100+75*j,100+i*75,this);
+
+                        }
+                        if(boards[i][j].getTag().substring(0,2).equals("bR")){
+                                g2d.drawImage(blackRook.getImage(),100+75*j,100+i*75,this);
+
+                        }
+                        if(boards[i][j].getTag().substring(0,2).equals("bH")){
+                                g2d.drawImage(blackKnight.getImage(),100+75*j,100+i*75,this);
+
+                        }
+                        if(boards[i][j].getTag().substring(0,2).equals("bB")){
+                                g2d.drawImage(blackBishop.getImage(),100+75*j,100+i*75,this);
+
+                        }
+                        if(boards[i][j].getTag().substring(0,2).equals("bQ")){
+                                g2d.drawImage(blackQueen.getImage(),100+75*j,100+i*75,this);
+
+                        }
+                        if(boards[i][j].getTag().substring(0,2).equals("bK")){
+                                g2d.drawImage(blackKing.getImage(),100+75*j,100+i*75,this);
+
+                        }
+                        if(boards[i][j].getTag().substring(0,2).equals("bP")){
+                                g2d.drawImage(blackPawn.getImage(),100+75*j,100+i*75,this);
+
+                        }
                     }
-                    if(boards[i][j].substring(0,2).equals("wR")){
-                            g2d.drawImage(whiteRook.getImage(),100+75*j,100+i*75,this);
-
-                    }
-                    if(boards[i][j].substring(0,2).equals("wH")){
-                            g2d.drawImage(whiteKnight.getImage(),100+75*j,100+i*75,this);
-
-                    }
-                    if(boards[i][j].substring(0,2).equals("wB")){
-                            g2d.drawImage(whiteBishop.getImage(),100+75*j,100+i*75,this);
-
-                    }
-                    if(boards[i][j].substring(0,2).equals("wQ")){
-                            g2d.drawImage(whiteQueen.getImage(),100+75*j,100+i*75,this);
-
-                    }
-                    if(boards[i][j].substring(0,2).equals("wK")){
-                            g2d.drawImage(whiteKing.getImage(),100+75*j,100+i*75,this);
-
-                    }
-                    if(boards[i][j].substring(0,2).equals("bR")){
-                            g2d.drawImage(blackRook.getImage(),100+75*j,100+i*75,this);
-
-                    }
-                    if(boards[i][j].substring(0,2).equals("bH")){
-                            g2d.drawImage(blackKnight.getImage(),100+75*j,100+i*75,this);
-
-                    }
-                    if(boards[i][j].substring(0,2).equals("bB")){
-                            g2d.drawImage(blackBishop.getImage(),100+75*j,100+i*75,this);
-
-                    }
-                    if(boards[i][j].substring(0,2).equals("bQ")){
-                            g2d.drawImage(blackQueen.getImage(),100+75*j,100+i*75,this);
-
-                    }
-                    if(boards[i][j].substring(0,2).equals("bK")){
-                            g2d.drawImage(blackKing.getImage(),100+75*j,100+i*75,this);
-
-                    }
-                    if(boards[i][j].substring(0,2).equals("bP")){
-                            g2d.drawImage(blackPawn.getImage(),100+75*j,100+i*75,this);
-
-                    }
-
                 }
                 if(setFill){setFill=false;}//switches the fill color for every y value change(change in i) so that the chess Board is accuratley represented
                     else{setFill=true;}
@@ -281,6 +334,7 @@ Open the settings page
 
             g2d.drawString("The checkmessage is: " + checkmessage,200,780);
         }
+    
         if(gamestate ==3){//if the state is 3( The state for a passed white pawn) then draw a queen, rook,knight and bishop to the screen
                 boolean secfill = !setFill;//used to switch the color of the squares for these Images without messing with the normal boards setFill 
                 for(int j =0; j < 4; j++){
@@ -329,12 +383,7 @@ Open the settings page
                 g2d.drawImage(blackRook.getImage(),100+75*5,700,this);
                 
         }
-        if(displayLoadingScreen){
-            g2d.setColor(Color.WHITE);//sets the color to white because that is the first color that we need 
-            g2d.fillRect(0, 0,800,800);
-            g2d.setColor(Color.BLACK);
-            g2d.drawString("Loading",350,400);
-        }
+        
         repaint();//calls the redraw of the buffered image that the graphics are drawn on so that it is constantly updated
     }
     /**
@@ -346,17 +395,6 @@ Open the settings page
         Graphics2D g2d = (Graphics2D)g;
         g2d.drawImage(backbuffer,0,0,this);
         
-    }
-    public void keyTyped(KeyEvent e) {}
-    public void keyPressed(KeyEvent e) {}  
-    public void keyReleased(KeyEvent e) {
-        
-        if(e.getKeyChar() == 'e'){
-            
-        }
-        board.isInCheck();
-        
-       ai.smartMove();
     }
     public void mouseDragged(MouseEvent e ){}
     public void mouseMoved(MouseEvent e){}
@@ -372,12 +410,12 @@ Open the settings page
      */
     public void mousePressed(MouseEvent e){//Where the event handeling begins, here the program checks if a piece has been selected, and if it has store information about it 
         board.updateBoard(boards);
-        updateState = false;
         int mouseX = e.getX();//gets the x and y values of the mouse 
         int mouseY = e.getY();
         for(int i =whiteMovesX.size()-1; i >-1;i--){//resets the whiteMovesX list to account for a potential move change 
             whiteMovesX.remove(i);
             whiteMovesY.remove(i);
+            
         }
         for(int i =blackMovesX.size()-1; i >-1;i--){//same with black moves 
             blackMovesX.remove(i);
@@ -404,34 +442,29 @@ Open the settings page
             if(mouseX>=250&&mouseX<=325&&mouseY>28&&mouseY<=103){//look to see if you clicked on a queen
                 
                 pawnsWhite[saveK].setTag(pawnsWhite[saveK].getID(),"Q",pawnsWhite[saveK].getTag().charAt(0));//change the pawn into a queen
-                 boards[pawnsWhite[saveK].getY()][pawnsWhite[saveK].getX()]=pawnsWhite[saveK].getTag();//update the Board with the new tag
-                board.updateBoard(boards);//update teh common Board to the displayed Board 
-                gamestate = 2;//allow for input again 
+                 boards[pawnsWhite[saveK].getY()][pawnsWhite[saveK].getX()].setsTag(pawnsWhite[saveK].getTag());//update the Board with the new tag
+                
                 //processMove(pawnsWhite[saveK],pawnsWhite[saveK].getX(),pawnsWhite[saveK].getY());
             }
             else if(mouseX>=325&&mouseX<=400&&mouseY>28&&mouseY<=103){//same thing as queen but for a bishop 
                 
                 pawnsWhite[saveK].setTag(pawnsWhite[saveK].getID(),"B",pawnsWhite[saveK].getTag().charAt(0));
-                
-                 boards[pawnsWhite[saveK].getY()][pawnsWhite[saveK].getX()]=pawnsWhite[saveK].getTag();
-                 board.updateBoard(boards);
-                 gamestate = 2;
+                gamestate=2;
+                 
                 //processMove(pawnsWhite[saveK],pawnsWhite[saveK].getX(),pawnsWhite[saveK].getY());
             }
             else if(mouseX>=400&&mouseX<=475&&mouseY>28&&mouseY<=103){//same thing as queen but for a horse 
                 
                 pawnsWhite[saveK].setTag(pawnsWhite[saveK].getID(),"H",pawnsWhite[saveK].getTag().charAt(0));
                 gamestate = 2;
-                 boards[pawnsWhite[saveK].getY()][pawnsWhite[saveK].getX()]=pawnsWhite[saveK].getTag();
-                board.updateBoard(boards);
+                 
                 //processMove(pawnsWhite[saveK],pawnsWhite[saveK].getX(),pawnsWhite[saveK].getY());
             }
             else if(mouseX>=475&&mouseX<=550&&mouseY>28&&mouseY<=103){//same thing as a queen but for a rook 
                
                 pawnsWhite[saveK].setTag(pawnsWhite[saveK].getID(),"R",pawnsWhite[saveK].getTag().charAt(0));
                 gamestate = 2;
-                 boards[pawnsWhite[saveK].getY()][pawnsWhite[saveK].getX()]=pawnsWhite[saveK].getTag();
-                board.updateBoard(boards);
+                
                 //processMove(pawnsWhite[saveK],pawnsWhite[saveK].getX(),pawnsWhite[saveK].getY());
             }
         }
@@ -440,16 +473,12 @@ Open the settings page
             if(mouseX>=250&&mouseX<=325&&mouseY>700&&mouseY<=800){
                 
                 pawnsBlack[saveK].setTag(pawnsBlack[saveK].getID(),"Q",pawnsBlack[saveK].getTag().charAt(0));
-                 boards[pawnsBlack[saveK].getY()][pawnsBlack[saveK].getX()]=pawnsBlack[saveK].getTag();
-                board.updateBoard(boards);
                 gamestate = 2;
                 //processMove(pawnsWhite[saveK],pawnsWhite[saveK].getX(),pawnsWhite[saveK].getY());
             }
             else if(mouseX>=325&&mouseX<=400&&mouseY>700&&mouseY<=800){
                 
                 pawnsBlack[saveK].setTag(pawnsBlack[saveK].getID(),"B",pawnsBlack[saveK].getTag().charAt(0));
-                board.updateBoard(boards);
-                 boards[pawnsBlack[saveK].getY()][pawnsBlack[saveK].getX()]=pawnsBlack[saveK].getTag();
                 gamestate = 2;
                 //processMove(pawnsWhite[saveK],pawnsWhite[saveK].getX(),pawnsWhite[saveK].getY());
             }
@@ -457,99 +486,29 @@ Open the settings page
                 
                 pawnsWhite[saveK].setTag(pawnsWhite[saveK].getID(),"H",pawnsWhite[saveK].getTag().charAt(0));
                 gamestate = 2;
-                 boards[pawnsBlack[saveK].getY()][pawnsBlack[saveK].getX()]=pawnsBlack[saveK].getTag();
-                board.updateBoard(boards);
+                 
                 //processMove(pawnsWhite[saveK],pawnsWhite[saveK].getX(),pawnsWhite[saveK].getY());
             }
             else if(mouseX>=475&&mouseX<=550&&mouseY>700&&mouseY<=800){
                
                 pawnsBlack[saveK].setTag(pawnsBlack[saveK].getID(),"R",pawnsBlack[saveK].getTag().charAt(0));
                 gamestate = 2;
-                 boards[pawnsBlack[saveK].getY()][pawnsBlack[saveK].getX()]=pawnsBlack[saveK].getTag();
-                board.updateBoard(boards);
+                 
                 //processMove(pawnsWhite[saveK],pawnsWhite[saveK].getX(),pawnsWhite[saveK].getY());
             }
         }
-        for(int i =0; i < 8;i++){//the code below is used to check if the x and y values are in the Board and store coordinates amd tag 
-            for(int j =0; j < 8; j++){//we loop through every square on the Board 
-                if(mouseX>100+j*75&&mouseX<100+75+j*75&&mouseY>100+i*75&&mouseY<100+(i*75)+75&&gamestate ==2){//checks if the mouse was presed on the Board  
-                    type = "";//resets type 
-                    for(int k=0; k<8;k++){//used to check if it is one of the pawns 
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==pawnsWhite[k].getID()&&board.getTurn()){//if the id matches a pawnID and it is whites turn
-                            saveK =k;//save the pawn that was selected so that we can check if the move made to it was legal when the mouse is released
-                            pawnsWhite[k].deleteMoves();//delete any previous moves so that there is no overlapping of moves, see piece.deleteMove() for details
-                            pawnsWhite[k].checkLegalMove();//stores all of the legal moves in an array list
-                            type="wP";//since a pawn can be upgraded to a different piece we need to use its tag to save the type
-                            //when the mouse is released, it will check if based on the tag, a legal move was made
-                        }
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==pawnsBlack[k].getID()&&!board.getTurn()){//same thing but for black pawn
-                            saveK =k;
-                            pawnsBlack[k].deleteMoves();
-                            pawnsBlack[k].checkLegalMove();
-                            type="bP";
-                        }
-                    }
-                    for(int k =0; k < 2;k++){//same as above but for other pieces 
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==rooksWhite[k].getID()&&board.getTurn()){
-                            saveK = k;
-                            rooksWhite[k].deleteMoves();
-                            rooksWhite[k].checkLegalMove();
-                            
-                           type = "wR";
-                        }
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==rooksBlack[k].getID()&&!board.getTurn()){
-                            saveK = k;
-                            rooksBlack[k].deleteMoves();
-                            rooksBlack[k].checkLegalMove();
-                            type = "bR";
-                        }
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==knightsWhite[k].getID()&&board.getTurn()){
-                            saveK = k;
-                            knightsWhite[k].deleteMoves();
-                            knightsWhite[k].checkLegalMove();
-                            type = "wH";
-                        }
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==knightsBlack[k].getID()&&!board.getTurn()){
-                            saveK = k;
-                            knightsBlack[k].deleteMoves();
-                            knightsBlack[k].checkLegalMove();
-                            type = "bH";
-                        }
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==bishopsWhite[k].getID()&&board.getTurn()){
-                            saveK = k;
-                            bishopsWhite[k].deleteMoves();
-                            bishopsWhite[k].checkLegalMove();
-                            type = "wB";
-                        }
-                        if(Integer.parseInt(boards[i][j].substring(2,4))==bishopsBlack[k].getID()&&!board.getTurn()){
-                            saveK = k;
-                            bishopsBlack[k].deleteMoves();
-                            bishopsBlack[k].checkLegalMove();
-                            type = "bB";
-                        }
-                    }
-                    if(Integer.parseInt(boards[i][j].substring(2,4))==queenWhite.getID()&&board.getTurn()){
-                            queenWhite.deleteMoves();
-                            queenWhite.checkLegalMove();
-                            type = "wQ";
-                    }
-                    if(Integer.parseInt(boards[i][j].substring(2,4))==queenBlack.getID()&&!board.getTurn()){
-                           
-                            queenBlack.deleteMoves();
-                            queenBlack.checkLegalMove();
-                            type = "bQ";
-                    }
-                    if(Integer.parseInt(boards[i][j].substring(2,4))==kingWhite.getID()&&board.getTurn()){
-                           
-                            kingWhite.deleteMoves();
-                            kingWhite.checkLegalMove();
-                            type = "wK";
-                    }
-                    if(Integer.parseInt(boards[i][j].substring(2,4))==kingBlack.getID()&&!board.getTurn()){
-                            kingBlack.deleteMoves();
-                            kingBlack.checkLegalMove();
-                            type = "bK";
-                    }
+        if(gamestate==2){
+            for(int i =0; i < 8;i++){//the code below is used to check if the x and y values are in the Board and store coordinates amd tag 
+                for(int j =0; j < 8; j++){//we loop through every square on the Board 
+                    if(mouseX>100+j*75&&mouseX<100+75+j*75&&mouseY>100+i*75&&mouseY<100+(i*75)+75&&gamestate ==2){//checks if the mouse was presed on the Board  
+                        type = "";//resets type 
+                        
+                        boards[i][j].deleteMoves();
+                        boards[i][j].checkLegalMove();
+                        type=boards[i][j].getTag().substring(0,2);
+                        saveY = i;
+                        saveX = j;
+                }
             }
         }
     }
@@ -562,55 +521,16 @@ Open the settings page
      * @param e  used to get the x and the y of the mouse 
      */
     public void mouseReleased(MouseEvent e){//here checks if a piece has been selected ,and if so, based on the x and y of the mouse if the move made to it is leaal
-      
+        
         int mouseX = e.getX();//stores the x and y of the mouse 
         int mouseY = e.getY();
         for(int i =0; i < 8;i++){//same loop as above, if the mouse was pressed on the Board, get the coordinates of the Board through x and y 
             for(int j =0; j < 8; j++){
                if(mouseX>100+j*75&&mouseX<100+75+j*75&&mouseY>100+i*75&&mouseY<100+(i*75)+75){
-                    
-                    if(type.equals("wP")){//if the type of piece that was selected was a white pawn
-                       processMove(pawnsWhite[saveK],j,i);//see if that was a legal move for the pawn and based off that peforms actions, see processMove for details, right below this class
-                       if(pawnsWhite[saveK].getY()==0&&pawnsWhite[saveK].getTag().charAt(1)=='P'){
-                           processPush(pawnsWhite[saveK]);
-                       }
-                    }
-                    if(type.equals("bP")){//same code 
-                        processMove(pawnsBlack[saveK],j,i);
-                        if(pawnsBlack[saveK].getY()==7&&pawnsBlack[saveK].getTag().charAt(1)=='P'){
-                           processPush(pawnsBlack[saveK]);
-                       }
-                    }
-                    if(type.equals("wR")){
-                        processMove(rooksWhite[saveK],j,i);
-                    }
-                    if(type.equals("bR")){
-                        processMove(rooksBlack[saveK],j,i);
-                    }
-                    if(type.equals("wB")){
-                        processMove(bishopsWhite[saveK],j,i);
-                    }
-                    if(type.equals("bB")){
-                        processMove(bishopsBlack[saveK],j,i);
-                    }
-                    if(type.equals("wH")){
-                        processMove(knightsWhite[saveK],j,i);
-                    }
-                    if(type.equals("bH")){
-                        processMove(knightsBlack[saveK],j,i);                       
-                    }
-                    if(type.equals("wQ")){
-                        processMove(queenWhite,j,i);
-                    }
-                    if(type.equals("bQ")){
-                        processMove(queenBlack,j,i);
-                    }
-                    if(type.equals("wK")){
-                        processMove(kingWhite,j,i);
-                    }
-                    if(type.equals("bK")){
-                        processMove(kingBlack,j,i);
-                    }
+                    if(boards[saveY][saveX].getTag().charAt(0)=='b'&&!turn){
+                    processMove(boards[saveY][saveX],j,i);}
+                    else if(boards[saveY][saveX].getTag().charAt(0)=='w'&&turn){
+                    processMove(boards[saveY][saveX],j,i);}
                 }            
     
             }
@@ -643,11 +563,9 @@ Open the settings page
         
             board.setTotalMoveCount(1);
             setBoard(board.getBoard());
-            boards[piece.getY()][piece.getX()] = "00000";
-            piece.moveChanges(piece2.getX()-x,piece2.getY());
-            boards[piece.getY()][piece.getX()]=piece.getTag();            
+                       
             board.updateBoard(boards);
-            board.switchTurn();
+            turn = !turn;
                
     }/**
      * Here any potential moves gathered from the mouseInputs are tested
@@ -678,53 +596,38 @@ Open the settings page
  If the move has been legal we edit the Board and handle any collisions that occur
  If the move is illegal reset the Board to the original version
      */
-    public void processMove(Piece piece, int x,int y){//mangages any move done to a piece
-
-        
+    public void processMove(Piece piece, int x,int y){//mangages any move done to a piece 
+        Piece current = board.getBoard()[y][x];
         if(handle){
-        
         switch(piece.checkPossibleMoves(x,y)){
             case 1:
-                handleCollision(piece.getTag().substring(0,2),piece.getY(),piece.getX(),true);
-                board.setTotalMoveCount(1);//everything is done in Board now for processing moves, will update all later, but this way we can transition into Board becoming the main class
-                board.getBoard()[piece.getY1()][piece.getX1()]="00000";
-                piece.setTag(Integer.parseInt(piece.getTag().substring(2,4)),piece.getTag().substring(1,2),piece.getTag().charAt(0));
-                System.out.println(piece.getTag());
-                board.getBoard()[piece.getY()][piece.getX()]=piece.getTag(); 
-                
-                if(piece.getTag().substring(0,2).equals("wQ")){
-                    System.out.println("working here");
-                    piece.displayMoves();
-                }
-                
-                //piece.deleteMoves();
-                if(!isInCheck(piece.getTag().charAt(0),true)){//if it is not in check 
-                    ai.addMove();
-                    setBoard(board.getBoard());//then update the display Board accordingly 
-                    board.switchTurn();
+                    handleCollision(piece.getTag().substring(0,2),piece.getY(),piece.getX(),true);
+                    board.getBoard()[y][x] = piece;
+                    System.out.println("piece x and y " + piece.getX() +  " " + piece.getY());
+                    board.getBoard()[piece.getY1()][piece.getX1()]=current;
+                    
+                if(!isInCheck(piece.getTag().charAt(0),true)){
+                    setBoard(board.getBoard());
+                    board.displayBoard();
+                    saveY =0; 
+                    saveX = 0; 
+                    type = "";
+                    System.out.println("hi");
+                    turn = !turn;
+                    break;
                 }else{
-                    //board.displayBoard();
-                    
-                    System.out.println("there was a check detected");
-                    board.updateBoard(boards);//sets the Board back to the original Board
-                    piece.moveChanges(piece.getX1(),piece.getY1());//moves the piece to its original location and sets the new location back to blank if it doesn't prevent a check
-                    break;//ends before the turn is switched so the person has a chace to get it right
-                    
+                    board.updateBoard(boards);
+                    piece.moveChanges(piece.getX1(),piece.getY1());
+                    break;
                 }
-                
-                break;
-        
             case 2://will update this later when i have time 
                 board.setTotalMoveCount(1);
                 System.out.println("special considered");
                 if(!isInCheck(piece.getTag().charAt(0),true)){
                     setBoard(board.getBoard());
-                    board.switchTurn();
-                    ai.addMove();
                 }
                 else{
                     board.updateBoard(boards);
-                    
                     piece.moveChanges(piece.getX1(),piece.getY1());
                     break;
                 }
@@ -740,12 +643,9 @@ Open the settings page
                 if(!isInOpposite('w',4,7)&&!isInOpposite('w',5,7)&&!isInOpposite('w',6,7)&&!isInOpposite('w',7,7)){
                     castleProcess(rooksWhite[1],kingWhite,1);
                     kingWhite.moveChanges(6,7);
-                    boards[7][6] = kingWhite.getTag();
-                    boards[7][4] = "00000";
+                    
                     System.out.println("KingWhite x and y " + kingWhite.getX() + " " +  kingWhite.getY());
                     board.updateBoard(boards);
-                
-                ai.addMove();
                 }    
                 else{
                     board.updateBoard(boards);
@@ -758,13 +658,10 @@ Open the settings page
                 if(!isInOpposite('b',4,0)&&!isInOpposite('b',5,0)&&!isInOpposite('b',6,0)&&!isInOpposite('b',7,0)){
                     System.out.println("ladies and gentlemen we gottem");
                     castleProcess(rooksBlack[1],kingBlack,1);
-                    kingWhite.moveChanges(6,0);
-                    boards[0][6] = kingBlack.getTag();
-                    boards[0][4] = "00000";
+                    kingBlack.moveChanges(6,0);
+                   
                     System.out.println("KingBlack x and y " + kingBlack.getX() + " " +  kingWhite.getY());
                     board.updateBoard(boards);
-                    
-                    ai.addMove();
                 }
                 else{
                     board.updateBoard(boards);
@@ -778,20 +675,16 @@ Open the settings page
                 if(!isInOpposite('w',0,7)&&!isInOpposite('w',1,7)&&!isInOpposite('w',2,7)&&!isInOpposite('w',3,7)&&!isInOpposite('w',4,7)){
                     System.out.println("ladies and gentlemen we gottem");
                     castleProcess(rooksWhite[0],kingWhite,-1);
-                    kingWhite.moveChanges(2,7);
-                    boards[7][2] = kingWhite.getTag();
-                    boards[7][4] = "00000";
+                    kingBlack.moveChanges(2,7);
+                   
                     System.out.println("KingWhite x and y " + kingWhite.getX() + " " +  kingWhite.getY());
                     board.updateBoard(boards);
-                    
-                    ai.addMove();
                 }
                 else{
                     board.updateBoard(boards);
                     
                     piece.moveChanges(4,7);
                     piece.movecount = 0;
-                    board.switchTurn();
                 }
                 
                 break;
@@ -800,12 +693,9 @@ Open the settings page
                     System.out.println("ladies and gentlemen we gottem");
                     castleProcess(rooksBlack[0],kingBlack,-1);
                     kingWhite.moveChanges(2,0);
-                    boards[0][2] = kingBlack.getTag();
-                    boards[0][4] = "00000";
+                    
                     System.out.println("KingWhite x and y " + kingWhite.getX() + " " +  kingWhite.getY());
                     board.updateBoard(boards);
-                   
-                    ai.addMove();
                 }
                 else{
                     board.updateBoard(boards);
@@ -843,7 +733,7 @@ Open the settings page
         }else if(isInCheck('w',true)){checkmessage = "is in checkwhite";}
         else if(isInCheck('b',true)){checkmessage = "is in checkblack";}
         else{checkmessage = "is not in check";}
-        updateState = true;
+       
     }
     /**
      * This is for castling and checks if black has a legal move in any of the squares that king and rook will cross through/inhibit
@@ -861,6 +751,7 @@ Open the settings page
                     return true;
                 }
             }
+            
         }
         if(color == 'w'){
             for(int i =0; i < blackMovesX.size();i++){
@@ -892,7 +783,7 @@ Open the settings page
             kingblackx = kingBlack.getX();
             kingwhitey = kingWhite.getY();
             kingblacky = kingBlack.getY();
-            
+         
         }
         if(color == 'w'){
             updateBlack();
@@ -901,6 +792,7 @@ Open the settings page
                     //tests if the kings location is in the potential locatiosn for the 
                     if(kingupdate){
                         checkmessage = "is in check white";
+                        
                     }
                     if(color=='w'){
                         
@@ -942,62 +834,16 @@ Open the settings page
      * It is only used for castling as of now 
      */
     public void updateArrays(){//where all the possible moves are gathered, setLocation() is below this                 
-                    queenWhite.checkLegalMove();
-                    setLocation(queenWhite,'w');
-                    queenWhite.checkLegalMove();
-                    
-                    kingWhite.checkLegalMove();
-                    setLocation(kingWhite,'w');
-                    kingWhite.checkLegalMove();
-                    
-                    for(int k=0; k<8;k++){//used to check if it is one of the pawns 
-                        pawnsWhite[k].checkLegalMove();//gets all of the legal moves, delete moves added to all of the mousePressed() so no overlap
-                        setLocation(pawnsWhite[k],'w');//adds it to the whiteMovesX and whiteMovesY array list
-                        pawnsWhite[k].checkLegalMove();
-                    }for(int k =0; k < 8; k++){    
-                        pawnsBlack[k].checkLegalMove();//gets all of the legal moves for a black pawn 
-                        setLocation(pawnsBlack[k],'b');// adds it to the blackMovesX and blackMovesY array list
-                        pawnsBlack[k].checkLegalMove();
-                    }
-                    for(int k =0; k < 2; k++){
-                        rooksWhite[k].checkLegalMove();    
-                        setLocation(rooksWhite[k],'w');
-                        rooksWhite[k].checkLegalMove();
-                        
-                       
-                        knightsWhite[k].checkLegalMove();
-                        setLocation(knightsWhite[k],'w');
-                        knightsWhite[k].checkLegalMove();
-                   
-                        bishopsWhite[k].checkLegalMove();
-                        setLocation(bishopsWhite[k],'w');
-                        bishopsWhite[k].checkLegalMove();
-                          
-                    }for(int k =0; k < 2; k++){       
-                        rooksBlack[k].checkLegalMove();
-                        setBlackLocation(rooksBlack[k],'b');
-                        rooksBlack[k].checkLegalMove();
-                   
-                    
-                        knightsBlack[k].checkLegalMove();
-                        
-                        setLocation(knightsBlack[k],'b');
-                        knightsBlack[k].checkLegalMove();
-    
-                        bishopsBlack[k].checkLegalMove();
-                        setLocation(bishopsBlack[k],'b');
-                        bishopsBlack[k].checkLegalMove();
-                    }
-                        queenBlack.checkLegalMove();
-                        setLocation(queenBlack,'b');
-                        queenBlack.checkLegalMove();
-                         
-                        kingBlack.checkLegalMove();
-                        setLocation(kingBlack,'b');
-                        kingBlack.checkLegalMove();
-                
-                    
-           
+        board.updateBoard(boards);
+        for(int i =0;i < 8; i++){
+            for(int j =0; j < 8; j++){
+                if(board.getBoard()[i][j].getTag().charAt(0)!='0'){
+                    board.getBoard()[i][j].checkLegalMove();
+                    setLocation(board.getBoard()[i][j],board.getBoard()[i][j].getTag().charAt(0));
+                    board.getBoard()[i][j].checkLegalMove();
+                }
+            }
+        }                 
     }
     /**
      * 
@@ -1005,7 +851,8 @@ Open the settings page
  Mainly used to update boards to the most updated array in Board, which is how all the pieces are edited so that there is no confusion between 
  graphics and between the 
      */
-    public void setBoard(String[][] board){
+    public void setBoard(Piece[][] board){
+        
        for(int i =0;i<8;i++){
            for(int j =0; j < 8;j++){
             boards[i][j]=board[i][j];
@@ -1025,7 +872,7 @@ Open the settings page
         if(piece.returnAlive()){
             ArrayList<Integer> prevX = new ArrayList<>();
             ArrayList<Integer> prevY = new ArrayList<>();
-            
+            board.updateBoard(boards);
             for(int i =0; i < piece.getMovesX().size();i++){
                 boolean on = false;
                 for(int j =0; j < prevX.size();j++){
@@ -1043,43 +890,34 @@ Open the settings page
                     y=piece.getMovesY().get(i);
                     special = piece.getSpecial().get(i);
                     handleCollision(piece.getTag().substring(0,2),y,x,false);
-
+                    
+                    Piece current = board.getBoard()[y][x];
+                    board.getBoard()[y][x] = piece;
+                    board.getBoard()[piece.getY()][piece.getX()] = current;
                     if(piece.getTag().charAt(0)=='w'){
-
                             if(piece.getTag().startsWith("wK")){
-
                                 kingwhitex = x;
                                 kingwhitey = y;
-                                
-
                             }else{
                                 kingwhitex = kingWhite.getX();
                                 kingwhitey = kingWhite.getY();
                             }
-                            String currenttag = board.getBoard()[y][x];
-                            board.getBoard()[piece.getY()][piece.getX()]="00000";
-
-                            board.getBoard()[y][x]=piece.getTag();
+                            
                             //board.displayBoard();
                             if(!isInCheck('w',false)){
                                
                                whitecount++;
                                whiteMovesX.add(x);//gets the ArrayList that stores moves in piece getMovesX() and getMovesY() and adds every element to the code
                                whiteMovesY.add(y);
-                               
+                               System.out.println("this is the piece that is performing the move and this is why we are not in check " + piece.getTag() +  x + "  "+ y);
+                               board.displayBoard();
                             }else{
-
                             }
        
                             board.updateBoard(boards);
 
                         }else{
 
-
-                            String currenttag = board.getBoard()[y][x];
-                            board.getBoard()[piece.getY()][piece.getX()]="00000";
-
-                            board.getBoard()[y][x]=piece.getTag();
                             //board.displayBoard();
                             if(piece.getTag().startsWith("bK")){
                                 kingblackx = x;
@@ -1095,11 +933,7 @@ Open the settings page
                                 blackMovesY.add(y);
                                 //System.out.println("Piece tag here lol xD fa: " + piece.getTag() + " x: " + piece.getX() + " y: " +  piece.getY());
                                 
-                            }else{
-
-
                             }
-
         //System.out.println("Possible moves: "+ piece.getTag()+ " "+piece.getMovesX().get(i) + " " + piece.getMovesY().get(i));, test code 
                             board.updateBoard(boards);
 
@@ -1108,14 +942,12 @@ Open the settings page
 
                     }
                 turnOnTemps();
+                
                 }
 
             piece.deleteMoves();//delets moves so no overlap, can now remove deleteMoves() from mousePressed()
         }
-        kingwhitex = kingWhite.getX();
-        kingwhitey = kingWhite.getY();
-        kingblackx= kingBlack.getX();
-        kingblacky = kingBlack.getY();
+       
     }/**
      * The purpose of this class is incase we need a variable there is one already setup 
      * @param specialOn In case we need to anything that requires an extra or editable variable this is what  this class is for 
@@ -1138,107 +970,18 @@ Open the settings page
      */
     public void handleCollision(String tag, int i, int j,boolean type){
         boolean control = false;
-        if(tag.charAt(0)=='w'&&boards[i][j].charAt(0)=='b'){
+        if(tag.charAt(0)=='w'&&boards[i][j].getTag().charAt(0)=='b'){
             control = true;
-        }else if(tag.charAt(0)=='b'&&boards[i][j].charAt(0)=='w'){
+        }else if(tag.charAt(0)=='b'&&boards[i][j].getTag().charAt(0)=='w'){
             control = true;
         }
         if(control){
-            System.out.println("collisions are being handled"); 
-            for(int k=0; k<8;k++){//used to check if it is one of the pawns 
-                        if(!tag.equals("wP")&&Integer.parseInt(boards[i][j].substring(2,4))==pawnsWhite[k].getID()){//same loop as in mousePressed(), except all inputs are considered
-                            if(type)
-                                pawnsWhite[k].setAlive(false);
-                            else
-                                pawnsWhite[k].controlledOff = false;
-                        }
-                        
-                    }//the above logic repeats for every piece on the Board 
-                    for(int k =0; k < 2;k++){//same as above but for other pieces 
-                        if(!tag.equals("wR")&&Integer.parseInt(board.getBoard()[i][j].substring(2,4))==rooksWhite[k].getID()){
-                            if(type)
-                                rooksWhite[k].setAlive(false);
-                            else
-                                rooksWhite[k].controlledOff = false;
-                        }
-                        
-                        if(!tag.equals("wH")&&Integer.parseInt(boards[i][j].substring(2,4))==knightsWhite[k].getID()){
-                            if(type)
-                                knightsWhite[k].setAlive(false);
-                            else
-                                knightsWhite[k].controlledOff = false;
-                        }
-                        
-                        if(!tag.equals("wB")&&Integer.parseInt(boards[i][j].substring(2,4))==bishopsWhite[k].getID()){
-                            if(type)
-                                bishopsWhite[k].setAlive(false);
-                            else
-                                bishopsWhite[k].controlledOff = false;
-                        }
-                       
-                    }
-                    if(!tag.equals("wQ")&&Integer.parseInt(boards[i][j].substring(2,4))==queenWhite.getID()){
-                            if(type)
-                                queenWhite.setAlive(false);
-                            else{
-                                System.out.println("other collision was being handled ");
-                                queenWhite.controlledOff = false;
-                            }
-                    }
-                   
-                    if(!tag.equals("wK")&&Integer.parseInt(boards[i][j].substring(2,4))==kingWhite.getID()){
-                            if(type)
-                                kingWhite.setAlive(false);
-                            else
-                                kingWhite.controlledOff = false;
-
-                    }
-               for(int k=0; k<8;k++){//used to check if it is one of the pawns 
-                        if(!tag.equals("bP")&&Integer.parseInt(boards[i][j].substring(2,4))==pawnsBlack[k].getID()){
-                            if(type)
-                                pawnsBlack[k].setAlive(false);
-                            else
-                               pawnsBlack[k].controlledOff = false;
-                        }
-                }//the above logic repeats for every piece on the Board 
-                for(int k =0; k < 2;k++){//same as above but for other pieces 
-                    
-                    if(!tag.equals("bR")&&Integer.parseInt(boards[i][j].substring(2,4))==rooksBlack[k].getID()){
-                        if(type)
-                             rooksBlack[k].setAlive(false);
-                            else
-                               rooksBlack[k].controlledOff = false;
-                    }
-                    
-                    if(!tag.equals("bH")&&Integer.parseInt(boards[i][j].substring(2,4))==knightsBlack[k].getID()){
-                        if(type)
-                             knightsBlack[k].setAlive(false);
-                            else
-                              knightsBlack[k].controlledOff = false;
-                    }
-                    
-                    if(!tag.equals("bB")&&Integer.parseInt(boards[i][j].substring(2,4))==bishopsBlack[k].getID()){
-                        if(type)
-                             bishopsBlack[k].setAlive(false);
-                            else
-                               bishopsBlack[k].controlledOff = false;
-                    }
-                }
+            if(type){
+                boards[i][j].setAlive(false);
                 
-                if(!tag.equals("bQ")&&Integer.parseInt(boards[i][j].substring(2,4))==queenBlack.getID()){
-                    if(type)
-                             queenBlack.setAlive(false);
-                            else
-                               queenBlack.controlledOff = false;
-                }
-                
-                if(!tag.equals("bK")&&Integer.parseInt(boards[i][j].substring(2,4))==kingBlack.getID()){
-                       if(type)
-                             kingBlack.setAlive(false);
-                            else
-                               kingBlack.controlledOff = false;
-                }
-
+            }else{
+                boards[i][j].controlledOff = false;
+            }
         }
     }/**
      * The purpose of this is to turn on all temporary offs after testing 
@@ -1273,11 +1016,11 @@ Open the settings page
 
                 for(int k=0; k<8;k++){//used to check if it is one of the pawns 
                         
-                            pawnsBlack[k].deleteMoves();
-                            pawnsBlack[k].checkLegalMove();//gets all of the legal moves for a black pawn 
-                            setBlackLocation(pawnsBlack[k],'b');// adds it to the blackMovesX and blackMovesY array list
+                    pawnsBlack[k].deleteMoves();
+                    pawnsBlack[k].checkLegalMove();//gets all of the legal moves for a black pawn 
+                    setBlackLocation(pawnsBlack[k],'b');// adds it to the blackMovesX and blackMovesY array list
                             
-                    }//the above logic repeats for every piece on the Board 
+                }//the above logic repeats for every piece on the Board 
                 for(int k =0; k < 2;k++){//same as above but for other pieces 
                    
                         rooksBlack[k].deleteMoves();
@@ -1381,11 +1124,3 @@ Open the settings page
     }
     
 }
-
-
-
-
-
-
-
-
