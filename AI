@@ -29,7 +29,7 @@ public class AI{
     int count = 0; 
     String whiteMove = "";
     String blackMove = "";
-   
+    boolean isActive = false;
     /**
      * Set globals = to chess 2 globals 
      * @param player the player we are creating a move for 
@@ -41,6 +41,11 @@ public class AI{
         this.board = board;
         this.enemy = enemy;
         state = 0; 
+        isActive=true;
+    }
+    //blank constructor to throw null pointer exception 
+    public AI(){
+        
     }
     /**
      * Used to pick our opening move 
@@ -551,10 +556,9 @@ public class AI{
                         System.out.println(player.pawns[i].getTag()+ " " + cloneX.get(j) + "  "+ cloneY.get(j));
                         player.pawns[i].checkLegalMove();
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
+                        
+                        player.pawns[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         handleTempCollisions(storedTag,player.pawns[i].getTag(),player.pawns[i].getX(),player.pawns[i].getY());
-                        if(player.pawns[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j))!=3){
-                            System.out.println("cloned " + player.pawns[i].getTag()+ " " + cloneX.get(j) + "  "+ cloneY.get(j));
-                        }
                         player.deleteMoves();
                         enemy.deleteMoves();
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
@@ -602,8 +606,9 @@ public class AI{
                     for(int j =0; j < cloneY.size();j++){
                         player.bishops[i].checkLegalMove();    
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
-                        handleTempCollisions(storedTag,player.bishops[i].getTag(),player.bishops[i].getX(),player.bishops[i].getY());
+                        
                         player.bishops[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
+                        handleTempCollisions(storedTag,player.bishops[i].getTag(),player.bishops[i].getX(),player.bishops[i].getY());
                         player.deleteMoves();
                         enemy.deleteMoves();
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
@@ -641,8 +646,9 @@ public class AI{
                         
                         player.rooks[i].checkLegalMove();    
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
-                        handleTempCollisions(storedTag,player.rooks[i].getTag(),player.rooks[i].getX(),player.rooks[i].getY());
+                        
                         player.rooks[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
+                        handleTempCollisions(storedTag,player.rooks[i].getTag(),player.rooks[i].getX(),player.rooks[i].getY());
                        player.deleteMoves();
                         enemy.deleteMoves();
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
@@ -680,8 +686,9 @@ public class AI{
                         
                         player.knights[i].checkLegalMove();
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
-                        handleTempCollisions(storedTag,player.knights[i].getTag(),player.knights[i].getX(),player.knights[i].getY());
+                       
                         player.knights[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
+                        handleTempCollisions(storedTag,player.knights[i].getTag(),player.knights[i].getX(),player.knights[i].getY());
                         player.deleteMoves();
                         enemy.deleteMoves();
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
@@ -719,16 +726,18 @@ public class AI{
                         
                         player.queen.checkLegalMove();
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
-                        handleTempCollisions(storedTag,player.queen.getTag(),player.queen.getX(),player.queen.getY());
+                        
                         player.queen.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
-                        
+                        handleTempCollisions(storedTag,player.queen.getTag(),player.queen.getX(),player.queen.getY());
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                        
+                            
                             evals.add(evalBoard(player.getPlayerTurn()));
                             moveX.add(cloneX.get(j));
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
                             pieceTag.add(player.queen.getTag());
+                        } else{
+                            
                         }
                         enemy.setAlives();
                         player.queen.moveChanges(storedX,storedY);
@@ -760,8 +769,8 @@ public class AI{
                         //player.king.checkLegalMove();
                         player.king.checkLegalMove();
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
-                        handleTempCollisions(storedTag,player.king.getTag(),player.king.getX(),player.king.getY());
                         player.king.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
+                        handleTempCollisions(storedTag,player.king.getTag(),player.king.getX(),player.king.getY());
                         player.deleteMoves();
                         enemy.deleteMoves();
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){      
