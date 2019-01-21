@@ -13,8 +13,12 @@ import java.util.ArrayList;
 import java.util.Random;
 
 /**
- *
- * @author vshah-21
+ *We have a state to determine whether or not the ai is considering openings or picking a move with eval 
+ * The ai has the common board, the the player that it is optimizing moves for and the opposing player 
+ * all moves is part of opening and it is a list of all the moves made(in chess notation) and this is compared against opening move lists 
+ * The count is also for opening and keeps track of all the moves made 
+ * whiteMove is a list of white moves made 
+ * blackMove is a list of black moves made 
  */
 public class AI{
     int state;
@@ -26,13 +30,30 @@ public class AI{
     String whiteMove = "";
     String blackMove = "";
    
-
+    /**
+     * Set globals = to chess 2 globals 
+     * @param player the player we are creating a move for 
+     * @param board the common board(an array of strings representing piece locations that every class has access to)  
+     * @param enemy  the enemy 
+     */
     public AI(Player player, Board board, Player enemy){
         this.player = player;
         this.board = board;
         this.enemy = enemy;
         state = 0; 
     }
+    /**
+     * Used to pick our opening move 
+     * First we created a buffered reader to read through our file 
+     * Next get our file 
+     * Make sure it exists 
+     * Create a series of strings to store specific parts of each line(these will be reused as we move through each line)
+     * Try and create a file reader and then create an String containing all the moves that we have made in order to compare to each line 
+     *To simplify the steps after this(we look at every line and compare our move line to that line after the \m:( each line has this before 
+     * they show their opening and see if it matches up. If there is a match return that move 
+     * If there are no matches between the moves made and any of the lines, then return 00000 
+     * @return 
+     */
     public String PickOpeningMove(){
     
     BufferedReader in = null;
@@ -96,10 +117,7 @@ public class AI{
                 
                 if (handlingLine&&startingIndex+compareMoveLine.length()<line.length()&&line.substring(startingIndex,startingIndex + compareMoveLine.length()).equals(compareMoveLine)){//if the current line contains the current moveLine 
                     //what to do if Opening matches up with an Opening in the repretoire
-                     System.out.println("the part of the line that we are looking at " + line.substring(startingIndex,startingIndex+compareMoveLine.length()));
-                     System.out.println("the part that we want to compare to  " + compareMoveLine);
-                     System.out.println("are they equal? " + line.substring(startingIndex,startingIndex+compareMoveLine.length()).equals(compareMoveLine));
-                    System.out.println("line: " + line);
+                    
                     boolean handle = false;
                     String returns = "";
                     int constant = startingIndex + compareMoveLine.length();
@@ -107,14 +125,13 @@ public class AI{
                     while(!handle){
                         if(count+constant>=line.length()||line.charAt(count+constant)==' '||line.charAt(count+constant)=='"'){
                             handle = true;
-                            //System.out.println("something");
+      
                         }else{
                             returns += line.charAt(count+constant);
                         }
                         count++;
                     }
-                    //System.out.println(returnThis);
-                    System.out.println("hi returns " + returns);
+                    
                     keepGoingDown=true;
                     return returns;
                 }else{
@@ -136,7 +153,11 @@ public class AI{
         }
         return ""; //temporary code
     }
-    
+    /**
+     * For conversions between chess notation and our board notation 
+     * @param x The letter in chess notation 
+     * @return The location on our board a = 0, b= 1 etc. 
+     */
     public int LetterToInt(String x){
         switch(x){
             case "a":
@@ -159,7 +180,11 @@ public class AI{
                 return 00000;
         }
     }
-    
+    /**
+     * Converting from our board notation to chess notation so we can take moves that the human makes and put them in chess notation 
+     * @param x the board location in int form 
+     * @return the resulting letter 
+     */
     public String IntToLetter(int x){
         switch(x){
             case 0:
@@ -182,7 +207,11 @@ public class AI{
                 return "00000";
         }
     }
-    
+    /**
+     * Accounts for the fact that our locations are flopped on the board so simply flips integers around to put them in chess notation 
+     * @param inverse the board location that we want to flip
+     * @return the flipped int 
+     */
     public int InverseInt (int inverse){
         switch(inverse){
             case 0:
@@ -205,20 +234,31 @@ public class AI{
                 return 00000;
         }
     }
-    
+    /**
+     * Takes our Pick opening function and outputs it as a move on the board 
+     * String movePicked is the output of this 
+     * If the movePicked returns a move(not "00000" which is no match found) then add the move to all moves 
+     * use the letter to int function and inverse int to convert chess notation into board coordinates locX and locY(the starting coordinates) 
+     * Store the board tag at locX locY and get the first character so we know what type of piece is at this board positon 
+     * Store the other half of the movePicked as board coordinates(where the piece will move) 
+     * Using the first character of the original board tag we figure out what type of piece we are supposed to be looking at and then check if 
+     * our new coordinates are legal coordinates for any of those pieces 
+     * If they are then move that piece and update the board accordingly 
+     * Also if we do not make a move then change our state so that we start evaluating moves 
+     */
     public void openingMove(){
         System.out.println("running");
-        
-        if(!PickOpeningMove().equals("00000")){
-                String movePicked = PickOpeningMove(); //movePicked is a string which opening repretoire plays. example is d2d4
+        String movePicked = PickOpeningMove(); //movePicked is a string which opening repretoire plays. example is d2d4
+        if(!movePicked.equals("00000")){
+                
                 allMoves.add(movePicked);
                 
                 int locX = LetterToInt(movePicked.substring(0,1));
                 
                 int locY = InverseInt(Integer.valueOf(movePicked.substring(1,2)) - 1);
-                System.out.println("locX " + locX + " locY " + locY);
+               
                 String tag = board.getBoard()[locY][locX];
-                System.out.println(tag);
+             
                 char type = tag.charAt(1);
                 int newLocX = LetterToInt(movePicked.substring(2,3));
                 int newLocY = InverseInt(Integer.valueOf(movePicked.substring(3,4)) - 1);
@@ -288,6 +328,12 @@ public class AI{
             smartMove();
         }
     }
+    /**
+     * Used to add moves to all moves for opening and is called in chess2  
+     * Get the last move made 
+     * Use our functions to convert from board notation to chess notation 
+     * add the new string to allMoves
+     */
     public void addMove(){
         String stored = board.getMoveRecorder().get(board.getMoveRecorder().size()-1);//tagy1x1yx
         String x1 = IntToLetter(Integer.valueOf(stored.substring(6,7)));
@@ -297,6 +343,14 @@ public class AI{
         System.out.println(x1 + y1 + x + y);
         allMoves.add(x1+y1+x+y);
     }
+    /**
+     * Used to make sure we don't randomly give up a piece by saying if we protect a piece the same amount of times as our enemy can take it its safe 
+     * otherwise subtract parameter val(the value of the piece) so we are forced to protect it 
+     * @param x the location of the piece we are checking 
+     * @param y the y location of the piece we are protecting 
+     * @param val the value of the piece we are protecting 
+     * @return if we fully protect the piece return 0, else return the value of the piece which is subtracted in eval 
+     */
     public double handleMove(int x, int y,double val){
         player.deleteMoves();
         enemy.deleteMoves();
@@ -331,6 +385,16 @@ public class AI{
         }
         return 0;
     }
+    /**
+     * Where we evaluate who is winning 
+     * For pawns our x and y locations give bonuses and pawns are worth +1 
+     * Rooks are worth 5, bishops 3.3 knights 2.7, queens 9 and kings 100(so we never give up our king) 
+     * Use handle move to make sure each piece is protected 
+     * Whitetotal keeps track of the totals for all of the white pieces on the board and blacktotal all the black pieces 
+     * depending on if we are black or white we subtract our total from the enemies total and return that value 
+     * @param isWhite whether or not we are white 
+     * @return our total - enemies total 
+     */
     public double evalBoard(boolean isWhite){
         double whiteTotal = 0;
         double blackTotal =0;
@@ -399,7 +463,14 @@ public class AI{
         }
         
         return blackTotal-whiteTotal;
-    }
+    }/**
+     * Used to handle any collisions that occur so that we can make sure there are the correct amount of pieces targeting another piece in handle moves 
+     * and to make sure we can take a piece to get out of check 
+     * @param originalSquare the tag of the square at the location(where the supposed collision takes place)
+     * @param newSquare the new tag of the square at the location
+     * @param x the x coordinate of the location
+     * @param y the y coordinate of the location
+     */
     public void handleTempCollisions(String originalSquare, String newSquare, int x, int y){
         boolean control = false;
         if(player.getPlayerTurn()&&originalSquare.charAt(0)=='b'&&newSquare.charAt(0)=='w'){
@@ -434,6 +505,16 @@ public class AI{
             
         }
     }
+    /**
+     * The main part of the ai class and it is where all of our functions are put together 
+     * First if we are in the opening state play out opening 
+     * Else play out evaluation 
+     * What we do here to summarize is we create arraylists that store information that we need and then loop through every single move, play out the 
+     * move, evaluate the board and if a move is legal(i.e no check) then add the result of the eval, the moveX and moveY,the index of the piece, 
+     * and the piece tag to our arrayLists 
+     * After we have evaluated  all the positions, loop through these arrayLists that we have created and pick out the one that results in the 
+     * highest evaluation and execute that move 
+     */
     public void smartMove(){
         if(player.getPlayerTurn()==board.getTurn()){
         if(state==0){
@@ -470,6 +551,7 @@ public class AI{
                         System.out.println(player.pawns[i].getTag()+ " " + cloneX.get(j) + "  "+ cloneY.get(j));
                         player.pawns[i].checkLegalMove();
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
+                        handleTempCollisions(storedTag,player.pawns[i].getTag(),player.pawns[i].getX(),player.pawns[i].getY());
                         if(player.pawns[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j))!=3){
                             System.out.println("cloned " + player.pawns[i].getTag()+ " " + cloneX.get(j) + "  "+ cloneY.get(j));
                         }
@@ -482,7 +564,7 @@ public class AI{
                             storedIndex.add(i);
                             pieceTag.add(player.pawns[i].getTag());
                         }else{
-                            handleTempCollisions(storedTag,player.pawns[i].getTag(),player.pawns[i].getX(),player.pawns[i].getY());
+                           
                             if(!board.isInSpecificCheck(player.getPlayerTurn())){
                                 evals.add(evalBoard(player.getPlayerTurn()));
                                 moveX.add(cloneX.get(j));
@@ -490,8 +572,9 @@ public class AI{
                                 storedIndex.add(i);
                                 pieceTag.add(player.pawns[i].getTag());
                             }
-                            enemy.setAlives();
+                            
                         }
+                        
                         player.pawns[i].moveChanges(storedX,storedY);
                         player.pawns[i].editMoveCount(movecounts);
                         System.out.println(player.pawns[i].getMoveCount());
@@ -519,6 +602,7 @@ public class AI{
                     for(int j =0; j < cloneY.size();j++){
                         player.bishops[i].checkLegalMove();    
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
+                        handleTempCollisions(storedTag,player.bishops[i].getTag(),player.bishops[i].getX(),player.bishops[i].getY());
                         player.bishops[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         player.deleteMoves();
                         enemy.deleteMoves();
@@ -528,17 +612,7 @@ public class AI{
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
                             pieceTag.add(player.bishops[i].getTag());
-                        }else{
-                            handleTempCollisions(storedTag,player.bishops[i].getTag(),player.bishops[i].getX(),player.bishops[i].getY());
-                            if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                                evals.add(evalBoard(player.getPlayerTurn()));
-                                moveX.add(cloneX.get(j));
-                                moveY.add(cloneY.get(j));
-                                storedIndex.add(i);
-                                pieceTag.add(player.bishops[i].getTag());
-                            }
-                            enemy.setAlives();
-                        }
+                        }enemy.setAlives();
                         player.bishops[i].moveChanges(storedX,storedY);
                         player.bishops[i].editMoveCount(movecounts);
                         board.getBoard()[player.bishops[i].getY()][player.bishops[i].getX()] = player.bishops[i].getTag();
@@ -567,6 +641,7 @@ public class AI{
                         
                         player.rooks[i].checkLegalMove();    
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
+                        handleTempCollisions(storedTag,player.rooks[i].getTag(),player.rooks[i].getX(),player.rooks[i].getY());
                         player.rooks[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                        player.deleteMoves();
                         enemy.deleteMoves();
@@ -576,17 +651,8 @@ public class AI{
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
                             pieceTag.add(player.rooks[i].getTag());
-                        }else{
-                            handleTempCollisions(storedTag,player.rooks[i].getTag(),player.rooks[i].getX(),player.rooks[i].getY());
-                            if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                                evals.add(evalBoard(player.getPlayerTurn()));
-                                moveX.add(cloneX.get(j));
-                                moveY.add(cloneY.get(j));
-                                storedIndex.add(i);
-                                pieceTag.add(player.rooks[i].getTag());
-                            }
-                            enemy.setAlives();
                         }
+                        enemy.setAlives();
                          player.rooks[i].moveChanges(storedX,storedY);
                         player.rooks[i].editMoveCount(movecounts);
                         board.getBoard()[player.rooks[i].getY()][player.rooks[i].getX()] = player.rooks[i].getTag();
@@ -614,6 +680,7 @@ public class AI{
                         
                         player.knights[i].checkLegalMove();
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
+                        handleTempCollisions(storedTag,player.knights[i].getTag(),player.knights[i].getX(),player.knights[i].getY());
                         player.knights[i].checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         player.deleteMoves();
                         enemy.deleteMoves();
@@ -623,17 +690,8 @@ public class AI{
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
                             pieceTag.add(player.knights[i].getTag());
-                        }else{
-                            handleTempCollisions(storedTag,player.knights[i].getTag(),player.knights[i].getX(),player.knights[i].getY());
-                            if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                                evals.add(evalBoard(player.getPlayerTurn()));
-                                moveX.add(cloneX.get(j));
-                                moveY.add(cloneY.get(j));
-                                storedIndex.add(i);
-                                pieceTag.add(player.knights[i].getTag());
-                            }
-                            enemy.setAlives();
                         }
+                        enemy.setAlives();
                         player.knights[i].moveChanges(storedX,storedY);
                         player.knights[i].editMoveCount(movecounts);
                         board.getBoard()[player.knights[i].getY()][player.knights[i].getX()] = player.knights[i].getTag();
@@ -661,6 +719,7 @@ public class AI{
                         
                         player.queen.checkLegalMove();
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
+                        handleTempCollisions(storedTag,player.queen.getTag(),player.queen.getX(),player.queen.getY());
                         player.queen.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         
                         if(!board.isInSpecificCheck(player.getPlayerTurn())){
@@ -670,17 +729,8 @@ public class AI{
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
                             pieceTag.add(player.queen.getTag());
-                        }else{
-                            handleTempCollisions(storedTag,player.queen.getTag(),player.queen.getX(),player.pawns[i].getY());
-                            if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                                evals.add(evalBoard(player.getPlayerTurn()));
-                                moveX.add(cloneX.get(j));
-                                moveY.add(cloneY.get(j));
-                                storedIndex.add(i);
-                                pieceTag.add(player.queen.getTag());
-                            }
-                            enemy.setAlives();
                         }
+                        enemy.setAlives();
                         player.queen.moveChanges(storedX,storedY);
                         player.queen.editMoveCount(movecounts);
                         
@@ -710,6 +760,7 @@ public class AI{
                         //player.king.checkLegalMove();
                         player.king.checkLegalMove();
                         String storedTag = board.getBoard()[cloneY.get(j)][cloneX.get(j)];
+                        handleTempCollisions(storedTag,player.king.getTag(),player.king.getX(),player.king.getY());
                         player.king.checkPossibleMoves(cloneX.get(j),cloneY.get(j));
                         player.deleteMoves();
                         enemy.deleteMoves();
@@ -719,17 +770,8 @@ public class AI{
                             moveY.add(cloneY.get(j));
                             storedIndex.add(i);
                             pieceTag.add(player.king.getTag());
-                        }else{
-                            handleTempCollisions(storedTag,player.king.getTag(),player.king.getX(),player.king.getY());
-                            if(!board.isInSpecificCheck(player.getPlayerTurn())){
-                                evals.add(evalBoard(player.getPlayerTurn()));
-                                moveX.add(cloneX.get(j));
-                                moveY.add(cloneY.get(j));
-                                storedIndex.add(i);
-                                pieceTag.add(player.king.getTag());
-                            }
-                            enemy.setAlives();
                         }
+                        enemy.setAlives();
                         player.king.moveChanges(storedX,storedY);
                         player.king.editMoveCount(movecounts);
                         board.getBoard()[player.king.getY()][player.king.getX()] = player.king.getTag();
