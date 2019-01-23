@@ -420,6 +420,7 @@ Open the settings page
                 setBoard(board.getBoard());
                 wasPromoted = false;
             }
+            setBoard(board.getBoard());
         }
         }catch(NullPointerException e2){}
         
