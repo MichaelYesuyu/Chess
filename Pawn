@@ -8,13 +8,13 @@ public class Pawn extends Piece{
     
     /**
      * This is the pawn object
-     * @param boards common board
+     * @param boards common Board
      * @param x x coordinate
      * @param y y coordinate
      * @param id piece id
      * @param color color of piece
      */
-    public Pawn(board boards, int x, int y, int id, char color){
+    public Pawn(Board boards, int x, int y, int id, char color){
         setup(boards, x,y,id,color);//uses base constructor
         setTag(id,"P",color);//tag is just for display mainly, but also used for now, once we have graphics we can transition out
     }    
@@ -39,7 +39,7 @@ public class Pawn extends Piece{
             default:
                 pawnMoves();
                 String currentMove = "";
-                if(totalMoveCount > 0){
+                if(totalMoveCount > 0&&moveRecorder.size()>0){
                     currentMove = moveRecorder.get(totalMoveCount - 1); //uses arrayList to get current move (move made before this)
                 }
                 if(tag.charAt(0)=='w'){
