@@ -19,6 +19,7 @@ public class Board {
     ArrayList<int[]> whiteLocations = new ArrayList<int[]>();//can store the x and y coordinates of every white piece and its id
     ArrayList<int[]> blackLocations = new ArrayList<int[]>();//stores the x and y coordinates for every black piece and its id
     ArrayList<String> moveRecorder = new ArrayList<String>();
+    ArrayList<String[][]> allMoves = new ArrayList<String[][]>();
     int whitecount = 0;//for ai later maybe 
     int blackcount = 0; 
     int totalMovecount =0;
@@ -40,6 +41,117 @@ public class Board {
             }
         }
         
+    }
+    public ArrayList<String[][]> getAllMoves(){
+        return allMoves;
+    }
+    public void addMoves(String[][] board){
+        String[][] allStuff = new String[8][8];
+                        
+        for(int j=0; j < 8; j++){
+            for(int k =0; k < 8;k++){
+                allStuff[j][k] = board[j][k];
+            }
+        }
+        allMoves.add(allStuff);
+    }
+    public void removeMove(){
+        
+        allMoves.remove(allMoves.size()-1);
+    }
+    public void undoMove(){
+        if(allMoves.size()>1){
+        System.out.println("move1 size" + allMoves.size());
+        removeMove();
+        System.out.println("move2 " + allMoves.size());
+        updateBoard(allMoves.get(allMoves.size()-1));
+        
+        int blackQueenCount = 0;
+        for(int i =0; i < 8; i ++){
+            for(int j =0; j < 8; j++){
+                for(int k =0; k < 8; k++){
+                    if(board[i][j].substring(2,4).equals(Integer.toString(white.pawns[k].getID()))){
+                        white.pawns[k].setAlive(true);
+                        white.pawns[k].moveChanges(j,i);
+                        white.pawns[k].editMoveCount(Integer.parseInt(board[i][j].substring(4)));
+                        
+                    }
+                    if(board[i][j].substring(2,4).equals(Integer.toString(black.pawns[k].getID()))){
+                        black.pawns[k].setAlive(true);
+                        black.pawns[k].moveChanges(j,i);
+                        black.pawns[k].editMoveCount(Integer.parseInt(board[i][j].substring(4)));
+                        
+                    }
+                }
+               for(int k =0; k < 2; k++){
+                    if(board[i][j].substring(2,4).equals(Integer.toString(white.bishops[k].getID()))){
+                        white.bishops[k].setAlive(true);
+                        white.bishops[k].moveChanges(j,i);
+                        white.bishops[k].editMoveCount(Integer.parseInt(board[i][j].substring(4)));
+                        
+                    }
+                    if(board[i][j].substring(2,4).equals(Integer.toString(black.bishops[k].getID()))){
+                        black.bishops[k].setAlive(true);
+                        black.bishops[k].moveChanges(j,i);
+                        black.bishops[k].editMoveCount(Integer.parseInt(board[i][j].substring(4)));
+                        
+                    }
+                    if(board[i][j].substring(2,4).equals(Integer.toString(white.knights[k].getID()))){
+                        white.knights[k].setAlive(true);
+                        white.knights[k].moveChanges(j,i);
+                        white.knights[k].editMoveCount(Integer.parseInt(board[i][j].substring(4)));
+                        
+                    }
+                    if(board[i][j].substring(2,4).equals(Integer.toString(black.knights[k].getID()))){
+                        black.knights[k].setAlive(true);
+                        black.knights[k].moveChanges(j,i);
+                        black.knights[k].editMoveCount(Integer.parseInt(board[i][j].substring(4)));
+                        
+                    }
+                    if(board[i][j].substring(2,4).equals(Integer.toString(white.rooks[k].getID()))){
+                        white.rooks[k].setAlive(true);
+                        white.rooks[k].moveChanges(j,i);
+                        white.rooks[k].editMoveCount(Integer.parseInt(board[i][j].substring(4)));
+                        
+                    }
+                    if(board[i][j].substring(2,4).equals(Integer.toString(black.rooks[k].getID()))){
+                        black.rooks[k].setAlive(true);
+                        black.rooks[k].moveChanges(j,i);
+                        black.rooks[k].editMoveCount(Integer.parseInt(board[i][j].substring(4)));
+                        
+                    }
+                    
+                }
+               if(board[i][j].substring(2,4).equals(Integer.toString(white.queen.getID()))){
+                        white.queen.setAlive(true);
+                        white.queen.moveChanges(j,i);
+                        white.queen.editMoveCount(Integer.parseInt(board[i][j].substring(4)));
+                        
+                    }
+                    if(board[i][j].substring(2,4).equals(Integer.toString(black.queen.getID()))){
+                        black.queen.setAlive(true);
+                        black.queen.moveChanges(j,i);
+                        black.queen.editMoveCount(Integer.parseInt(board[i][j].substring(4)));
+                        
+                    }
+                    if(board[i][j].substring(2,4).equals(Integer.toString(white.king.getID()))){
+                        white.king.setAlive(true);
+                        white.king.moveChanges(j,i);
+                        white.king.editMoveCount(Integer.parseInt(board[i][j].substring(4)));
+                        
+                    }
+                    if(board[i][j].substring(2,4).equals(Integer.toString(black.king.getID()))){
+                        black.king.setAlive(true);
+                        black.king.moveChanges(j,i);
+                        black.king.editMoveCount(Integer.parseInt(board[i][j].substring(4)));
+                        
+                    }
+               
+                
+            }
+        }
+        switchTurn();
+        }
     }
     public void setReady(boolean ready){
         this.ready = ready;
