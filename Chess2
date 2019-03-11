@@ -55,6 +55,13 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     Images blackQueen = new Images("blackqueen.png");
     Images blackKing= new Images("blackking.png");
     Images blackPawn = new Images("blackpawn.png");
+    Images undo = new Images("undo.png");
+    Images slide1 = new Images("slide1.png");
+    Images slide2 = new Images("slide2.png");
+    Images slide3 = new Images("slide3.png");
+    Images rightArrow = new Images("rightarrow.png");
+    Images leftArrow = new Images("leftarrow.png");
+    Images home = new Images("home.png");
     String[][] boards ={//an 8 by 8 array representing the Board the Board is meant to be transfered between the Board class and this class so that the ai can keep track of the Board, setup in Board
             {"bR260","bH270","bB280","bQ290","bK300","bB310","bH320","bR330"},//each piece has a tag, the first char is the color, second is type, and third is id  
             {"bP340","bP350","bP360","bP370","bP380","bP390","bP400","bP410"},//tags are used to calculate the legal moves available, and differentiate between pieces of the same type
@@ -116,7 +123,7 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
     boolean wasPromoted = false;
     String type1Tag = "human";
     String type2Tag = "human";
-    
+    boolean started = false;
     public Chess2(){    
         super("Chess Game");//tittle is chess game
         addMouseListener(this);//the mouselisteners, listens for any mouse events 
@@ -148,15 +155,16 @@ public class Chess2 extends JFrame implements Runnable, MouseListener, MouseMoti
         black = new Player(board,pawnsBlack, rooksBlack, knightsBlack, bishopsBlack, queenBlack,kingBlack,false);
         board.setBlack(black);
         board.setWhite(white);
-        
+        board.addMoves(board.getBoard());
         board.setReady(true);
+        ai = new AI(board);
     }
     
     public void run(){//the while running loop goes here 
          Thread current = Thread.currentThread();
         while(current==gameloop){
             try{
-                gameloop.sleep(30);//around 60fps, fact check
+                gameloop.sleep(60);//around 60fps, fact check
             }catch(InterruptedException e){
                 e.printStackTrace();//if for somereason there is an error, print where it occured 
             }
@@ -191,7 +199,10 @@ Open the settings page
         //THIS IS DRAWN NO MATTER WHAT 
         g2d.setColor(Color.WHITE);//sets the color to white because that is the first color that we need 
         g2d.fillRect(0, 0,800,800);
+        Font stringFont2 = new Font( "SansSerif", Font.PLAIN, 12);//we got this method from stack exchange in a post about changing fonts 
+        g2d.setFont(stringFont2);
         if(gamestate==0){
+            if(!started){
             g2d.setColor(Color.BLACK);
             g2d.fill(new Rectangle(200,400,100,100));
             g2d.fill(new Rectangle(400,400,100,100));
@@ -199,7 +210,16 @@ Open the settings page
             g2d.setColor(Color.WHITE);
             g2d.drawString("Start",440,450);
             g2d.drawString("Directions",220,450);
+            }
+            else{
+                g2d.setColor(Color.BLACK);
+            g2d.fill(new Rectangle(200,400,100,100));
+            g2d.fill(new Rectangle(400,400,100,100));
             
+            g2d.setColor(Color.WHITE);
+            g2d.drawString("Resume",430,450);
+            g2d.drawString("Restart " ,220,450);
+            }
         }
         if(gamestate==5){
             g2d.setColor(Color.BLACK);
@@ -217,6 +237,7 @@ Open the settings page
             g2d.drawString("Start game",370,600);
         }
         if(gamestate >=2&&gamestate<=4){
+            g2d.drawImage(undo.getImage(),750,50,this);
             for(int i =7; i >= 0; i--){//a two by two loop, starts from the bottom at 7,7 for formating purposes
 
                 for(int j =7; j >= 0; j--){
@@ -350,11 +371,22 @@ Open the settings page
                 g2d.drawImage(blackRook.getImage(),100+75*5,700,this);
                 
         }
-        if(displayLoadingScreen){
-            g2d.setColor(Color.WHITE);//sets the color to white because that is the first color that we need 
-            g2d.fillRect(0, 0,800,800);
-            g2d.setColor(Color.BLACK);
-            g2d.drawString("Loading",350,400);
+        if(gamestate ==6){
+            g2d.drawImage(slide1.getImage(),20,50,this);
+        }
+        if(gamestate==7){
+            g2d.drawImage(slide2.getImage(),20,50,this);
+        }
+        if(gamestate==8){
+            g2d.drawImage(slide3.getImage(),300,300,this);
+        }
+        if(gamestate>=6){
+             
+            g2d.drawImage(rightArrow.getImage(),740,400,this);
+            g2d.drawImage(leftArrow.getImage(),-5,400,this);
+        }
+        if(gamestate!=0){
+            g2d.drawImage(home.getImage(),50,50,this);
         }
         repaint();//calls the redraw of the buffered image that the graphics are drawn on so that it is constantly updated
     }
@@ -377,9 +409,6 @@ Open the settings page
      */
     public void keyReleased(KeyEvent e) {
         
-        if(e.getKeyChar() == 'e'){
-            
-        }
         try{
         if(ai.isActive){
             ai.smartMove();
@@ -390,8 +419,11 @@ Open the settings page
                 setBoard(board.getBoard());
                 wasPromoted = false;
             }
+            setBoard(board.getBoard());
         }
         }catch(NullPointerException e2){}
+        
+        
     }
     public void mouseDragged(MouseEvent e ){}
     public void mouseMoved(MouseEvent e){}
@@ -430,8 +462,25 @@ Open the settings page
          if(mouseX >=400&&mouseX<=500&&mouseY>=400&mouseY<=500){
              displayBoard = 0;//give time for the Board to render in the graphics 
              setVisible(false);
-             gamestate = 5;
-         }   
+             if(!started){
+                gamestate = 5;
+                started = true;
+             }
+             else{
+                gamestate=2;
+             }
+             
+         }
+         if(mouseX >=200&&mouseX<=300&&mouseY>=400&mouseY<=500){
+             displayBoard = 0;//give time for the Board to render in the graphics 
+             setVisible(false);
+             if(!started){
+             gamestate = 6;
+             }else{
+                 gamestate =0;
+                 resetBoard();
+             }
+         }
         }
         
         if(gamestate==3){//if we are in a state where a white pawn has been passed
@@ -616,7 +665,26 @@ Open the settings page
     public void mouseReleased(MouseEvent e){//here checks if a piece has been selected ,and if so, based on the x and y of the mouse if the move made to it is leaal
         int mouseX = e.getX();//stores the x and y of the mouse 
         int mouseY = e.getY();
-        if(gamestate==5){//coordinates of t1Tag-> 200,400,100,100 two: 350,550,100,100 three: 500,400,100,100 ->t2tag
+        if(gamestate!=0){
+            if(mouseX>50&&mouseX<75&&mouseY>50&&mouseY<75){
+                gamestate=0;
+            }
+        }
+        if(gamestate>=6){
+            if(mouseX>770&&mouseX<800&&mouseY>390&&mouseY<440){
+                gamestate++;
+            }
+            if(mouseX>0&&mouseX<50&&mouseY>390&&mouseY<440){
+                gamestate--;
+            }
+            if(gamestate<6){
+                gamestate = 6;
+            }
+            if(gamestate>8){
+                gamestate =8;
+            }
+        }
+        else if(gamestate==5){//coordinates of t1Tag-> 200,400,100,100 two: 350,550,100,100 three: 500,400,100,100 ->t2tag
             System.out.println("getting input");
             boolean stateChanged = false;
             if(!stateChanged&&mouseX >=200&&mouseX<=300&&mouseY>=400&mouseY<=500&&type2Tag.equals("human")&&type1Tag.equals("human")){
@@ -639,7 +707,7 @@ Open the settings page
                 System.out.println("we are changing this states");
                 stateChanged = true;
             }
-            else if(mouseX >=350&&mouseX<=450&&mouseY>=500&mouseY<=600){
+            else if(mouseX >=350&&mouseX<=450&&mouseY>=550&mouseY<=650){
                 if(type1Tag.equals("AI")){
                     ai = new AI(black,board,white);
                 } else if(type2Tag.equals("AI")){
@@ -658,7 +726,11 @@ Open the settings page
             
         }
         if(gamestate>1&&gamestate<5){
-            
+            if(mouseX>750&&mouseX<800&&mouseY>50&&mouseY<100){
+                System.out.println("udone");
+                board.undoMove();
+                setBoard(board.getBoard());
+            }else{
             for(int i =0; i < 8;i++){//same loop as above, if the mouse was pressed on the Board, get the coordinates of the Board through x and y 
                 for(int j =0; j < 8; j++){
                    if(mouseX>100+j*75&&mouseX<100+75+j*75&&mouseY>100+i*75&&mouseY<100+(i*75)+75){
@@ -710,6 +782,7 @@ Open the settings page
                 }
             }
         }
+        }
         
     }/**
      * If the piece was a white pawn then set the state to three, the state that process input for a white passed pawn 
@@ -739,6 +812,8 @@ Open the settings page
             setBoard(board.getBoard());
             boards[piece.getY()][piece.getX()] = "00000";
             piece.moveChanges(piece2.getX()-x,piece2.getY());
+            piece.decrementMoveCount();
+            System.out.println(piece.getTag() + piece.getMoveCount());
             boards[piece.getY()][piece.getX()]=piece.getTag();            
             board.updateBoard(boards);
             board.switchTurn();
@@ -779,7 +854,7 @@ If the move is illegal reset the Board to the original version
         
         if(handle){
         
-        switch(piece.checkPossibleMoves(x,y)){
+        switch(piece.checkPossibleMoves(x,y,true)){
             case 1:
                 handleCollision(piece.getTag().substring(0,2),piece.getY(),piece.getX(),true);
                 board.setTotalMoveCount(1);//everything is done in Board now for processing moves, will update all later, but this way we can transition into Board becoming the main class
@@ -800,7 +875,7 @@ If the move is illegal reset the Board to the original version
                     board.switchTurn();
                 }else{
                     //board.displayBoard();
-                    
+                    board.removeMove();
                     System.out.println("there was a check detected");
                     board.updateBoard(boards);//sets the Board back to the original Board
                     piece.moveChanges(piece.getX1(),piece.getY1());//moves the piece to its original location and sets the new location back to blank if it doesn't prevent a check
@@ -829,7 +904,8 @@ If the move is illegal reset the Board to the original version
                 break;
             case 3: 
                 System.out.println("this piece has no moves");
-                
+                System.out.println(piece.getMovesX().size());
+                piece.displayMoves();
                 break;
             case 4: 
                 System.out.println("is it the case that is an error");
@@ -1466,6 +1542,23 @@ If the move is illegal reset the Board to the original version
                 whiteOtherMovesY.add(piece.getMovesY().get(i));
             }
         }
+    }
+    public void resetBoard(){
+        while(board.allMoves.size()>2){
+            board.undoMove();
+        }
+        board.undoMove();
+        setBoard(board.getBoard());
+        board.undoMove();
+        setBoard(board.getBoard());
+        board.setTurn(true);
+        int constantSize = ai.allMoves.size();
+        for(int i =0; i < constantSize;i++){
+            ai.allMoves.remove(ai.allMoves.size()-1);
+        }
+        ai.state =0;
+        gamestate=0;
+        started= false;
     }
     /**
      * 
